@@ -1,0 +1,107 @@
+<!-- ***************************************************************************
+*   @license                                                                   *
+*   Copyright 2017 random-parts. All Rights Reserved.                          *
+*                                                                              *
+*   Licensed under the Apache License, Version 2.0 (the "License");            *
+*   you may not use this file except in compliance with the License.           *
+*   You may obtain a copy of the License at                                    *
+*                                                                              *
+*       http://www.apache.org/licenses/LICENSE-2.0                             *
+*                                                                              *
+*   Unless required by applicable law or agreed to in writing, software        *
+*   distributed under the License is distributed on an "AS IS" BASIS,          *
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+*   See the License for the specific language governing permissions and        *
+*   limitations under the License.                                             *
+**************************************************************************** -->
+
+<html>
+  <head>
+  </head>
+  <body>
+<table align="center" width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td>
+      <table align="center" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+         <td align="center" width="100%"><h2><?= first_name ?>, will you attend the <?= team_name ?> game?</h2></td>
+       </tr>
+        <tr>
+          <td align="center" width="100%"><h2><?= game_date ?><br/><br/><?= game_time ?></h2></td>
+        </tr>
+        <tr>
+          <td align="center" width="100%"><p>vs. <?= game_opp ?></p></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <table align="left" width="100%" border="0" cellspacing="10px" cellpadding="0">
+        <tr>
+          <td align="center" width="100%" style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;"><!--[if mso]>
+  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<?= yes_link ?>" style="height:60px;v-text-anchor:middle;width:225px;" arcsize="7%" strokecolor="#07270" fillcolor="#127C12">
+    <w:anchorlock/>
+    <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">Yes!</center>
+  </v:roundrect>
+<![endif]--><a href="<?= yes_link ?>"
+style="background-color:#127C12;border:1px solid #07270;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:16px;font-weight:bold;line-height:60px;text-align:center;text-decoration:none;width:225px;-webkit-text-size-adjust:none;mso-hide:all;">Absolutely!</a></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+    <tr>
+    <td>
+      <table align="left" width="100%" border="0" cellspacing="10px" cellpadding="0">
+        <tr>
+          <td align="center"style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;"><!--[if mso]>
+  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<?= probably_link ?>" style="height:60px;v-text-anchor:middle;width:225px;" arcsize="7%" strokecolor="#051E1E" fillcolor="#0D5D5D">
+    <w:anchorlock/>
+    <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">No.</center>
+  </v:roundrect>
+<![endif]--><a href="<?= probably_link ?>"
+style="background-color:#0D5D5D;border:1px solid #051E1E;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:16px;font-weight:bold;line-height:60px;text-align:center;text-decoration:none;width:225px;-webkit-text-size-adjust:none;mso-hide:all;">Probably?</a></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+      <tr>
+    <td>
+      <table align="left" width="100%" border="0" cellspacing="10px" cellpadding="0">
+        <tr>
+          <td align="center"style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;"><!--[if mso]>
+  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<?= doubtful_link ?>" style="height:60px;v-text-anchor:middle;width:225px;" arcsize="7%" strokecolor="#311B09" fillcolor="#9B5216">
+    <w:anchorlock/>
+    <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">No.</center>
+  </v:roundrect>
+<![endif]--><a href="<?= doubtful_link ?>"
+style="background-color:#9B5216;border:1px solid #311B09;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:16px;font-weight:bold;line-height:60px;text-align:center;text-decoration:none;width:225px;-webkit-text-size-adjust:none;mso-hide:all;">Doubtful...</a></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+    <tr>
+    <td>
+      <table align="left"  width="100%" border="0" cellspacing="10px" cellpadding="0">
+        <tr>
+          <td align="center" style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;"><!--[if mso]>
+  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="<?= no_link ?>" style="height:60px;v-text-anchor:middle;width:225px;" arcsize="7%" strokecolor="#310909" fillcolor="#9B1616">
+    <w:anchorlock/>
+    <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">Maybe?</center>
+  </v:roundrect>
+<![endif]--><a href="<?= no_link ?>"
+style="background-color:#9B1616;border:1px solid #310909;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:16px;font-weight:bold;line-height:60px;text-align:center;text-decoration:none;width:225px;-webkit-text-size-adjust:none;mso-hide:all;">Nope.</a></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table align="center" width="100%" border="0" cellspacing="10px" cellpadding="0">
+    <tr>
+    <td>. . .or reply at Google Sheets:</td>
+  </tr>
+      <tr>
+    <td><?= sheets_url ?></td>
+  </tr>
+</table>
+  </body>
+</html>

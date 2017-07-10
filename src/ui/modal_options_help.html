@@ -1,0 +1,79 @@
+<!-- ***************************************************************************
+*   @license                                                                   *
+*   Copyright 2017 random-parts. All Rights Reserved.                          *
+*                                                                              *
+*   Licensed under the Apache License, Version 2.0 (the "License");            *
+*   you may not use this file except in compliance with the License.           *
+*   You may obtain a copy of the License at                                    *
+*                                                                              *
+*       http://www.apache.org/licenses/LICENSE-2.0                             *
+*                                                                              *
+*   Unless required by applicable law or agreed to in writing, software        *
+*   distributed under the License is distributed on an "AS IS" BASIS,          *
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+*   See the License for the specific language governing permissions and        *
+*   limitations under the License.                                             *
+**************************************************************************** -->
+
+<html>
+  <head>
+    <style type="text/css">body ul{margin:0;padding-left:10px}.modal-dialog-title{text-align:center}#a,#b,#c,#d,#e,#f,#g,#h,#i{display:none}#a:target,#b:target,#c:target,#d:target,#e:target,#f:target,#g:target,#h:target,#i:target{display:block}ul{text-align:left}</style>
+  </head>
+  <body>
+    <div style="text-align: center;"><p>Extra Options Help Menu</p><div>
+    <ul>
+      <li><p><a href="#a" target="_self">Re-install Team Form</a></p>
+        <div id="a" class="faq">
+          <p>This will remove the Form attached to the spreadsheet and create a new Google Form; 
+          setting the spreadsheet as its destination.<br/><br/>The old Form file with still be inside Google Drive, 
+          and will have to be manually trashed.
+          </p>
+        </div>
+      </li>
+      <li><p><a href="#b" target="_self">Re-install Triggers</a></p>
+        <div id="b" class="faq">
+          <p>Re-install the project triggers for this spreadsheet.</p>
+        </div>
+      </li>
+      <li><p><a href="#c" target="_self">Re-set Web Link</a></p>
+      <div id="c" class="faq">
+          <p>Add the weblink manually in-case the wrong one was entered, or just because it's kinda fun to do.<br/><br/>
+          If there are values within the schedule ranges it will wipe the sheet in order to give the new link data a fresh start. 
+          This will also remove the values within the rsvp ranges.</p>
+        </div>
+      </li>
+      <li><p><a href="#d" target="_self">Remove Conditional Formatting</a></p>
+        <div id="d" class="faq">
+          <p>Removes the conditional formatting within the squad range.</p>
+        </div>
+      </li>
+      <li><p><a href="#e" target="_self">Remove Dependencies <br>[soft un-install]</a></p>
+        <div id="e" class="faq">
+          <p>This is a bit of a soft-uninstall. It will remove the triggers, the document properties[settings], the template sheet, 
+          and the Form response sheet while also detaching the form.</p>
+        </div>
+      </li>
+      <li><p><a href="#f" target="_self">Remove Triggers</a></p>
+        <div id="f" class="faq">
+          <p>Remove the Triggers for this spreadsheet if you prefer this add-on doing absolutely nothing. Triggers will re-install if a new season is created and they do not exist.<br/><br/>
+          Removing the add-on will remove all project triggers across all of the [user owned] spreadsheets this add-on was used with.</p>
+        </div>
+      </li>
+      <li><p><a href="#g" target="_self">Restore Conditional Formatting</a></p>
+        <div id="g" class="faq">
+          <p>Restores the conditional formatting within the squad range; in case it had been tragically removed.</p>
+        </div>
+      </li>
+      <li><p><a href="#h" target="_self">Restore Data Validation</a></p>
+        <div id="h" class="faq">
+          <p>This will reset the data validation preventing uncouth and malicious input.</p>
+        </div>
+      </li>
+      <li><p><a href="#i" target="_self">Restore Named Ranges</a></p>
+        <div id="i" class="faq">
+          <p>If the NamedRanges get too screwy from row and column deletes, resetting them here should help. Maybe.</p>
+        </div>
+      </li>
+    </ul>
+  </body>
+</html>
