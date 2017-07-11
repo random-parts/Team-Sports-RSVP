@@ -29,4 +29,8 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 - The sheet schedule should auto-update as the website updates. It is possiable to run updates using the `Advanced Options>Run schedule update` option.
 - 3 days and 1 day before the next gameday, the email task will process who has not yet rsvp'd to the game and will send an automated email reminder with the option to set their intention from within that email. If you feel a need to send the emails more often, the `Advanced Options>Run Send Email Task` is available to run the process immediately.
 
+**Google Sheets share permissions**
+
+- Share the sheet using the **"Anyone with the link can view"** permission for optimal user experance. The script's Sheet protections allow for editing within certin ranges with data validation. This allows team members to update their status without having to first login to Google or to have a Google account, while still protecting the integrity of the sheet.
+
 
