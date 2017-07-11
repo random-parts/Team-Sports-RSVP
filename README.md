@@ -27,6 +27,6 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 **Manual task running (Advanced Options):**
 
 - The sheet schedule should auto-update as the website updates. It is possiable to run updates using the `Advanced Options>Run schedule update` option.
-- 3 days and 1 day before the next gameday, the email task will process who has not yet rsvp'd to the game and will send an automated email reminder with the option to set their intention from within the email. If you feel the need to send emails more often, the `Advanced Options>Run Send Email Task` is aviable to do run the process immediately.
+- 3 days and 1 day before the next gameday, the email task will process who has not yet rsvp'd to the game and will send an automated email reminder with the option to set their intention from within that email. If you feel a need to send the emails more often, the `Advanced Options>Run Send Email Task` is available to run the process immediately.
 
 
