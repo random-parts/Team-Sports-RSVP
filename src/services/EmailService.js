@@ -43,7 +43,7 @@ function emailService () {
     var email_days = settings().email.daysBeforeGame;
     // Convert dates into Day of the year
     var today = utils(ss).date.asDayOfYear(new Date());
-    var gameday = utils(ss).date.asDayOfYear(new Date(next_game[0][1]));
+    var gameday = utils(ss).date.asDayOfYear(new Date(next_game[1][0]));
     var days_until_game = (gameday - today);
     
     return Boolean(email_days.indexOf(days_until_game) != -1);
