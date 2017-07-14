@@ -94,7 +94,7 @@ function settings () {
     clearAll: clearStorageProperties,
     //
     email: {
-      get daysBeforeGame () { return _numToArray(_getSetting["EMAIL_DAYS"]) || [1, 3] },
+      get daysBeforeGame () { return Number(_numToArray(_getSetting["EMAIL_DAYS"])) || [1, 3] },
       set daysBeforeGame (val) { storage.setProperty("EMAIL_DAYS", val) }
     },
     sheet: {
