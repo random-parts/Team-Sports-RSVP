@@ -41,7 +41,7 @@ function teamService () {
    * @memberof! teamService#
    * @this team
    */
-  function findTeamName () { 
+  function findTeamName (prompt) { 
     const div_teams = [];
     const team_value = {};
     var s = schedule().raw();
