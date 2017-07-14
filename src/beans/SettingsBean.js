@@ -67,7 +67,8 @@ function settings () {
    * @return {Number|Array}
    */ 
   function _numToArray (stored_property) {
-    return JSON.parse("[" + stored_property + "]"); 
+    try { return JSON.parse("[" + stored_property + "]") }
+     catch (e) { return null }
   }
   
   /**
