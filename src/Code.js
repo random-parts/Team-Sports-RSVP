@@ -94,6 +94,9 @@ function onOpen (e) {
  * process any emails that should go out for the day.
  */   
 function onDailyTrigger () {
+  // Create a team form if one is not attached
+  if (ss.getFormUrl() == null) { onCreateForm() } 
+    
   // Update the form confirmation message
   formService().updateConfirmation();
   
