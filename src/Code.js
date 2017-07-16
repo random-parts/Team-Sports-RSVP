@@ -28,7 +28,7 @@
 /**
  * @file Contains the controller methods used to orchestrate script actions
  * @license Apache License, Version 2.0
- * @version 1.1.10
+ * @version 1.1.11
  */
 
 /**
@@ -94,9 +94,10 @@ function onOpen (e) {
  * process any emails that should go out for the day.
  */   
 function onDailyTrigger () {
+  var ss = Config.spreadsheet();
   // Create a team form if one is not attached
   if (ss.getFormUrl() == null) { onCreateForm() } 
-    
+  
   // Update the form confirmation message
   formService().updateConfirmation();
   
@@ -104,12 +105,7 @@ function onDailyTrigger () {
   scheduleService().update();
   
   // Check if emails should be sent; if so check that there is a form to send; send
-  if (emailService().isEmailDay()) { 
-    var ss = Config.spreadsheet(); 
-     if (ss.getFormUrl() == null) { onCreateForm() }
-    
-    emailService().sendMail(); 
-  } 
+  if (emailService().isEmailDay()) { emailService().sendMail() } 
 }
 
 /**
