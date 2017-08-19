@@ -74,11 +74,11 @@ function schedule (spreadsheet) {
    * | web schedule | value kind
    * |---|---
    * | `schedule[i][0]` | date [ EEE-MMM d ]
-   * | `schedule[i][1]` | home team
+   * | `schedule[i][1]` | "(home team)"
    * | `schedule[i][2]` | [ "v" | score ]
-   * | `schedule[i][3]` | away team
-   * | `schedule[i][4]` | [ time | "Complete" | "Being Rescheduled" | "Pending Results" ]
-   * | `schedule[i][5]` | "Being Rescheduled"
+   * | `schedule[i][3]` | "(away team)"
+   * | `schedule[i][4]` | [ time | "Complete" | "Pending Results" ]
+   * | `schedule[i][5]` | "(Venue/Field Name)" | "Being Rescheduled"
    * 
    * @memberof! schedule# 
    * @this apiBuilder
@@ -105,7 +105,7 @@ function schedule (spreadsheet) {
   
   /**
    * ---
-   * Retreives the rsvp values by column(s) using the Sheets API
+   * Retrieves the rsvp values by column(s) using the Sheets API
    *
    * | array | value kind
    * |---|---
