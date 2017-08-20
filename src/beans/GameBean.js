@@ -91,10 +91,13 @@ function game (spreadsheet) {
   /**
    * ---
    * Formats and sets the game header into its cell.
+   * 
+   * @param {Array=} arguments[0] - Extra game info/venue (field name)
    */
   function _formatHeader () {
     var head_cell = game_cell.offset(0, column);
-    head_cell.setValue(header)
+    var venue = arguments.length ?  arguments[0] : null
+    head_cell.setValue(header + venue)
              .setFontWeight("regular")
              .setFontColor("white")
              .setBackground("#434343"); 
@@ -113,7 +116,7 @@ function game (spreadsheet) {
   
   /**
    * ---
-   * Formats and sets cancelled game labeels into cells.
+   * Formats and sets cancelled game labels into cells.
    */
   function _formatCancelledGame () {
     var head_cell = game_cell.offset(0, column);
@@ -164,10 +167,13 @@ function game (spreadsheet) {
   
   /**
    * ---
-   * Checks the field column of the web schedule for the rescheduled noticed.
+   * Checks the field column of the web schedule for the rescheduled notice
+   * and sets the field/venue in the header if the game is not cancelled. 
    */
   function _formatField () {
     if (RegExp(/rescheduled/i).test(field)) { _formatCancelledGame() }
+    var venue = '\n' + field;
+    _formatHeader(venue);
   }
   
   /**
