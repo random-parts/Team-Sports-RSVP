@@ -148,6 +148,139 @@ function sheet (spreadsheet) {
     ); 
   }
   
+/******************************************************************************
+*                          sheet().conditionalFormat                          *
+******************************************************************************/
+
+  /**
+   * ---
+   * Creates the conditional format request object for the RSVP Range.
+   * Dim the font foreground color in columns
+   * where the date in the game date cell is in the past.
+   *
+   * @memberof! sheet#
+   * @return {Array} requests_list - Conditional format rule for each RSVP column
+   */
+  function getRSVPConditionalFormatting () {
+    var sheet_id = sh.getSheetId();
+    var rsvp_range = ss.getRangeByName("rsvpRange") || ss.getRangeByName("_t_rsvpRange");
+    var date_range =  ss.getRangeByName("dateColumns") || ss.getRangeByName("_t_dateColumns");
+    var requests_list = [];
+
+    SpreadsheetApp.flush();
+
+    // Add each columns' update request into an array for batch processing
+    for (var i = 0; i < rsvp_range.getNumColumns(); i++) {
+      var is_pastdate_cell = sh.getRange(date_range.getRow(), (i + rsvp_range.getColumn()));
+      var absolute_range = is_pastdate_cell.getA1Notation().replace(/([A-Z]*)([0-9]*)/, "$$$1$$$2");
+
+      // Set the range for the rule_condition
+      var range = {
+        "sheetId": sheet_id,
+        "startRowIndex": rsvp_range.getRow() - 2,
+        "endRowIndex": rsvp_range.getLastRow(),
+        "startColumnIndex": i + rsvp_range.getColumn() - 1,
+        "endColumnIndex": i + rsvp_range.getColumn(),
+      };
+
+      // Condition rule for the formatting
+      var rule_condition = {
+        "type": "CUSTOM_FORMULA",
+        "values": [{"userEnteredValue": '=IF(' + absolute_range + '< TODAY(), True)'}]
+      };
+
+      // Full batchUpdate request object
+      var req = {
+        "addConditionalFormatRule": {
+          "rule": {
+            "ranges":[range],
+            "booleanRule": {
+              "condition": rule_condition,
+              "format": {
+                "textFormat": {
+                  "foregroundColor": {
+                    "red": 0.878,
+                    "green":0.878,
+                    "blue": 0.878,
+                    "alpha": 1
+                  }
+                }
+              }
+            }
+          },
+          "index": 0
+        }
+      };
+
+      requests_list.push(req);
+    }
+
+    return requests_list
+  }
+
+  /**
+   * ---
+   * Creates the conditional format request object for the Squad Range.
+   * It changes the background color of the squad mates row depending
+   * on if the first column of the row range is blank.
+   *
+   * @memberof! sheetService#
+   * @return {Array} requests_list - Conditional format rule for each Squad row
+   */
+  function getSquadConditionalFormatting () {
+    var sheet_id = sh.getSheetId();
+    var squad_range = ss.getRangeByName("squad") || ss.getRangeByName("_t_squad");
+    var requests_list = [];
+
+    SpreadsheetApp.flush();
+
+    // Add each rows' update request into an array for batch processing
+    for (var i = 0; i < squad_range.getNumRows(); i++) {
+      var isblank_cell = sh.getRange((i + squad_range.getRow()), squad_range.getColumn());
+      var absolute_range = isblank_cell.getA1Notation().replace(/([A-Z]*)([0-9]*)/, "$$$1$$$2");
+
+      // Set the range for the rule_condition
+      var range = {
+        "sheetId": sheet_id,
+        "startRowIndex": i + (squad_range.getRow() - 1),
+        "endRowIndex": i + squad_range.getRow(),
+        "startColumnIndex": 0,
+        "endColumnIndex": squad_range.getLastColumn()
+      };
+
+      // Condition rule for the formatting
+      var rule_condition = {
+        "type": "CUSTOM_FORMULA",
+        "values": [{"userEnteredValue": '= ISBLANK(' + absolute_range + ')'}]
+      };
+
+      // Full batchUpdate request object
+      var req = {
+        "addConditionalFormatRule": {
+          "rule": {
+            "ranges":[range],
+            "booleanRule": {
+              "condition": rule_condition,
+              "format": {
+                "backgroundColor": {
+                  "red": 0.741,
+                  "green":0.741,
+                  "blue": 0.741,
+                  "alpha": 1
+                }
+              }
+            }
+          },
+          "index": 0
+        }
+      };
+
+      requests_list.push(req);
+    }
+
+    return requests_list
+  }
+
   /**
    * @typedef {sheet} sheet.PublicInterface
    * @property {Function} createSheet - [sheet().create()]{@link sheet#createSheet}
@@ -157,6 +290,8 @@ function sheet (spreadsheet) {
    * @property {Function} setUnprotectedRanges - [sheet().setProtect()]{@link sheet#setUnprotectedRanges}
    * @property {Function} setNamedRanges - [sheet().updateNamedRanges()]{@link sheet#setNamedRanges}
    * @property {Function} dataValidation - [sheet().validation()]{@link sheet#dataValidation}
+   * @property {Function} getRSVPConditionalFormatting - [sheet().conditionalFormat.rsvp()]{@link sheet#getRSVPConditionalFormatting}
+   * @property {Function} getSquadConditionalFormatting - [sheet().conditionalFormat.squad()]{@link sheet#getSquadConditionalFormatting}
    * @property {SheetObject} sh - (Accessor|Mutator)
    * @property {String} editor - (Mutator) single editor
    * @property {Array} editor_list - (Mutator) editor list
@@ -178,6 +313,10 @@ function sheet (spreadsheet) {
     setProtect: setUnprotectedRanges,
     updateNamedRanges: setNamedRanges,
     validation: dataValidation,
+    conditionalFormat: {
+      rsvp: getRSVPConditionalFormatting,
+      squad: getSquadConditionalFormatting
+    },
     //
     get sh () { return sh },
     get sheet_protection () { return sheet_protection },

@@ -124,7 +124,7 @@ function sheetService () {
     // Set the web import data link
     this.setFormulas();
 
-    setSquadConditionalFormatting(this.sh);
+    setSheetConditionalFormatting.call(sheet(ss), this.sh);
 
     SpreadsheetApp.flush();
   }
@@ -219,71 +219,25 @@ function sheetService () {
   
   /**
    * ---
-   * Adds conditional formatting to the squad range rows. 
-   * It changes the background color of the squad mates row depending 
-   * on if the first column of the row range is blank.
+   * Sets all conditional formatting in one API BatchUpdate Request
    *
    * @memberof! sheetService#
    * @param {SheetObject} sheet - the sheet to work on
    */
-  function setSquadConditionalFormatting (sheet) {
-    var sheet;
-    var sh = sheet || ss.getSheets()[0];
-    var sheet_id = sh.getSheetId();
-    var squad_range = ss.getRangeByName("squad") || ss.getRangeByName("_t_squad");
+  function setSheetConditionalFormatting (sheet) {
     var requests_list = [];
-  
-    SpreadsheetApp.flush();
-    
-    // Add each rows' update request into an array for batch processing
-    for (var i = 0; i < squad_range.getNumRows(); i++) {
-      var isblank_cell = sh.getRange((i + squad_range.getRow()), squad_range.getColumn());
-      var absolute_range = isblank_cell.getA1Notation().replace(/([A-Z]*)([0-9]*)/, "$$$1$$$2");
-      
-      // Set the range for the rule_condition 
-      var range = {
-        "sheetId": sheet_id,
-        "startRowIndex": i + (squad_range.getRow() - 1),
-        "endRowIndex": i + squad_range.getRow(),
-        "startColumnIndex": 0,
-        "endColumnIndex": squad_range.getLastColumn()
-      };
-      var rule_condition = {
-        "type": "CUSTOM_FORMULA",
-        "values": [{"userEnteredValue": '= ISBLANK(' + absolute_range + ')'}]
-      };
-      
-      // Full batchUpdate request object
-      var req = {
-        "addConditionalFormatRule": {
-          "rule": {
-            "ranges":[range],
-            "booleanRule": {
-            "condition": rule_condition,
-            "format": {
-              "backgroundColor": {
-                "red": 0.741,
-                "green":0.741,
-                "blue": 0.741,
-                "alpha": 1
-               }
-             }
-           }
-         },
-         "index": 0
-        }
-      };
-    
-      requests_list.push(req);  
-    }
-    // Finish the Request Body object
+
+    this.sh = sheet || ss.getSheets()[0];
+    // Gather the conditional formatting request
+    requests_list.push(this.conditionalFormat.rsvp());
+    requests_list.push(this.conditionalFormat.squad());
+    // Create the BatchUpdate Request object
     var request_body = {
       "requests": requests_list,
       "includeSpreadsheetInResponse": false
     };
-    
-    var payload = JSON.stringify(request_body);
-    var response = Sheets.Spreadsheets.batchUpdate(payload, ss_id);
+
+    Sheets.Spreadsheets.batchUpdate(JSON.stringify(request_body), ss_id);
   }
 
   /**
@@ -308,7 +262,7 @@ function sheetService () {
    * @property {Function} createSheet - [sheetService().create.season()]{@link sheetService#createSheet}
    * @property {Function} templateSheet - [sheetService().create.template()]{@link sheetService#templateSheet}
    * @property {Function} removeSheet - [sheetService().remove.sheet()]{@link sheetService#removeSheet}
-   * @property {Function} setSquadConditionalFormatting - [sheetService().update.conditionalFormatting()]{@link sheetService#setSquadConditionalFormatting}
+   * @property {Function} setSheetConditionalFormatting - [sheetService().update.conditionalFormatting()]{@link sheetService#setSheetConditionalFormatting}
    * @property {Function} updateNamedRanges - [sheetService().update.namedRanges()]{@link sheetService#updateNamedRanges}
    * @property {Function} setSheetProtections - [sheetService().update.protection()]{@link sheetService#setSheetProtections}
    * @property {Function} setSheetValidation - [sheetService().update.validation()]{@link sheetService#setSheetValidation}
@@ -326,7 +280,7 @@ function sheetService () {
       sheet: removeSheet.bind(sheet(ss))
     },
     update: {
-      conditionalFormatting: setSquadConditionalFormatting,
+      conditionalFormatting: setSheetConditionalFormatting.bind(sheet(ss)),
       namedRanges: updateNamedRanges.bind(sheet(ss)),
       protection: setSheetProtections.bind(sheet(ss)),
       validation: setSheetValidation.bind(sheet(ss))
