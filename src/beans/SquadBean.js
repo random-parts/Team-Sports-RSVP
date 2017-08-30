@@ -94,6 +94,8 @@ function squad (spreadsheet) {
   /**
    * ---
    * Sets the returning squad list to the named sheet.
+   * The playing `Next?` season column must contain a `y`.
+   * "yes", "probably", "maybe", etc
    *
    * @memberof! squad#
    * @this apiBuilder
@@ -101,14 +103,15 @@ function squad (spreadsheet) {
   function setReturningSquadMates () {
     var squad_range = ss.getRangeByName("squad");
     var sheet = ss.getSheetByName(sheet_name);
-    var values_range = sheet.getRange(squad_range.getRow(), 
-                                      squad_range.getColumn(), 
-                                      returning.length, 
+    var values_range = sheet.getRange(squad_range.getRow(),
+                                      squad_range.getColumn(),
+                                      returning.length,
                                       squad_range.getNumColumns());
 
     this.value_range.range = values_range.getA1Notation();
     this.value_range.values = returning;
-    
+    this.update.options.valueInput = "USER_ENTERED";
+
     return this.updateRangeValues();
   }
   
