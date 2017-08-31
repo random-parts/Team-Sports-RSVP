@@ -28,7 +28,7 @@
 /**
  * @file Contains the controller methods used to orchestrate script actions
  * @license Apache License, Version 2.0
- * @version 1.1.11
+ * @version 1.2.12
  */
 
 /**
