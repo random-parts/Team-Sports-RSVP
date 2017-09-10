@@ -59,43 +59,45 @@ function emailService () {
   function sendMail () {
     var values = _getSendMailSets();
     var ss_url = ss.getUrl();
-
-  /**
-   * ---
+    /**
+     * ---
      * Set & send each individual email
      *
      * @this email
      */
     values.forEach(function (e, oi) {
-      this.time_zone = ss.getSpreadsheetTimeZone();
-      this.team_name = team().name;
-      this.email_type = e.email_type;
-      this.templates = _getEmailTemplates(e.email_type);
-      this.sheets_url = ss_url;
-      this.game_date = e.game_date;
-      this.game_time = e.game_date;
-      this.game_opp = e.game_opponent;
-      
-      for (var ii = 0; ii < e.to_send.length; ii++) {
-        this.first_name = e.to_send[ii][0][0] || "";
-        this.email = e.to_send[ii][0][1];
-        
-        if (e.email_type == "Rsvp") {
-          this.yes_link = e.to_send[ii][1][0];
-          this.probably_link = e.to_send[ii][1][1];
-          this.doubtful_link = e.to_send[ii][1][2];
-          this.no_link = e.to_send[ii][1][3];
-        }
-        
-        var email_body = this.createMessage();
-        
-        this.html_body = HtmlService.createHtmlOutput(email_body[0].evaluate())
-                                    .getContent();
+      // Only process emails when there is a valid email list
+      if (e.to_send.length) {
+        this.time_zone = ss.getSpreadsheetTimeZone();
+        this.team_name = team().name;
+        this.email_type = e.email_type;
+        this.templates = _getEmailTemplates(e.email_type);
+        this.sheets_url = ss_url;
+        this.game_date = e.game_date;
+        this.game_time = e.game_date;
+        this.game_opp = e.game_opponent;
 
-        this.text_body = email_body[1].evaluate()
+        for (var ii = 0; ii < e.to_send.length; ii++) {
+          this.first_name = e.to_send[ii][0][0] || "";
+          this.email = e.to_send[ii][0][1];
+
+          if (e.email_type == "Rsvp") {
+            this.yes_link = e.to_send[ii][1][0];
+            this.probably_link = e.to_send[ii][1][1];
+            this.doubtful_link = e.to_send[ii][1][2];
+            this.no_link = e.to_send[ii][1][3];
+          }
+
+          var email_body = this.createMessage();
+
+          this.html_body = HtmlService.createHtmlOutput(email_body[0].evaluate())
                                       .getContent();
-        // Use exponential backoff to account for untimely server issues
-        utils(ss).script.retry(this.send);
+
+          this.text_body = email_body[1].evaluate()
+                                        .getContent();
+          // Use exponential backoff to account for untimely server issues
+          utils(ss).script.retry(this.send);
+        }
       }
     }, email());
   }
@@ -107,8 +109,6 @@ function emailService () {
   /**
    * ---
    * Gets the html & plain text templates by email_type
-   *
-
    *
    * @param {String} type of template(s) to make
    * @return {Array}    
@@ -146,19 +146,22 @@ function emailService () {
     upcoming_gameday[0].forEach(function (e, oi) {
       var game_list = [];
       // When no one has rsvp'd; email everyone and check next gameday
-      if (typeof rsvp_col == "undefined") { 
-        email_list.push(squad_emails.filter(String));
-        
-        return;
+      if (typeof rsvp_col[oi] == "undefined") {
+        // Filter squad rows without an email address
+        email_list.push(squad_emails
+                  .filter(function (r) { return (typeof r[1] != "undefined") }));
+      } else {
+        // Match empty cells in the game column with email addresses
+        for (var ii = 0; ii < squad_emails.length; ii++) {
+          if (!rsvp_col[oi][ii]) {
+            (typeof squad_emails[ii][1] != "undefined")
+              ? game_list.push(squad_emails[ii]) : null;
+          }
+        }
+        email_list.push(game_list);
       }
-     // Find empty cells in the game column
-     innerLoop:
-      for (var ii = 0; ii < squad_emails.length; ii++) {
-        if (rsvp_col[oi][ii] != null && rsvp_col[oi][ii] != "") { continue innerLoop }
-         else { squad_emails[ii].length ? game_list.push(squad_emails[ii]) : null }
-      }
-      email_list.push(game_list);
     });
+
     return email_list;
   }
   
@@ -166,7 +169,6 @@ function emailService () {
    * ---
    * Gathers the template values into per game objects 
    * for the upcoming gameday email notifications
-   *
    *
    * @return {Array}
    * ```
@@ -184,6 +186,7 @@ function emailService () {
     var game_info = schedule(ss).composite.apply(null, upcoming_gameday[0]);
     var squad_emails = squad(ss).emails();
     var send_list = _getSendList(squad_emails, upcoming_gameday);
+    var filtered_emails = squad_emails.filter(function (e) { return (typeof e[1] != "undefined") })
     var mail_sets = [];
 
     /** 
@@ -210,15 +213,12 @@ function emailService () {
         }
       
         obj.email_type = "Rsvp";
-      
-      } else { 
-        // Use all squad emails for cancelled game notifications 
-        // and set to the same to_send position as above.
-        for (var ii = 0; ii < squad_emails.length; ii++) {
-          if (typeof squad_emails[ii][1] == "undefined") { continue }
-          if (squad_emails[ii][1] != null || squad_emails[ii][1].trim() != "") {
-            to_sendmail.push([squad_emails[ii]]); 
-          }
+
+      } else {
+        // Use all squad emails for cancelled game notifications
+        // and set to the same to_send position as above
+        for (var ii = 0; ii < filtered_emails.length; ii++) {
+          to_sendmail.push([filtered_emails[ii]]);
         }
         
         obj.email_type = "Cancelled";
