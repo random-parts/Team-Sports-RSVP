@@ -109,10 +109,14 @@ function sheetService () {
    * @param {String} arguments[1] sheetname
    */
   function seasonSheet (prompt_name) {
-    var template_sheet = template(ss).getTemplate()
-    
+    var template_sheet = template(ss).getTemplate();
+
+    do {
+      var sheet_name = prompt_name();
+    } while (!_isUniqueSheetName(sheet_name))
+
     this.prefix = "";
-    this.name = prompt_name(); 
+    this.name = sheet_name;
     this.options = { template: template_sheet };
     this.index = 0;
     // Create new sheet
@@ -250,9 +254,25 @@ function sheetService () {
   function updateNamedRanges() {
     this.sh = ss.getSheets()[0];
     this.prefix = "";
-    this.named_ranges = ss.getNamedRanges()
+    this.named_ranges = ss.getNamedRanges();
     this.removeNamedRanges();
     this.updateNamedRanges();
+  }
+
+/*********************************************************************************
+*                                   @private                                     *
+*********************************************************************************/
+  /**
+   * ---
+   * Checks if the new sheet name is unique or not
+   *
+   * @params {String} name - The desired new sheet name to check if unique
+   * @returns {Boolean}
+   */
+  function _isUniqueSheetName (name) {
+    var sheet_names = ss.getSheets().map(function(e){return e.getName()});
+
+    return (sheet_names.indexOf(name) == -1)
   }
 
   /**

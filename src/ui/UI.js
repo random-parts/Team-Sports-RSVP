@@ -192,7 +192,7 @@ function ui () {
    * @return {String|Null}
    */
   function askSheetName () {
-    var prompt_sheetname = ui.prompt("Enter a name for the sheet:", 
+    var prompt_sheetname = ui.prompt("Enter a Unique name for the sheet:",
                                      ui.ButtonSet.OK_CANCEL);
     var button = prompt_sheetname.getSelectedButton();
     var text = (prompt_sheetname.getResponseText() == "") 

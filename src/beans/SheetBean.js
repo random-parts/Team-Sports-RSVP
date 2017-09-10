@@ -34,13 +34,12 @@ function sheet (spreadsheet) {
   var sh = sh || ss.getSheets()[0];
   var editor, editor_list, name, prefix, protection, index, options,
       rule, sheet_protection, unprotected_list, validation_ranges, named_ranges;
-  
+
   /**
    * ---
-   * Creates a new sheet based on passed in argument.
+   * Creates a new sheet with options
    *
    * @memberof! sheet#
-   * @param {String} type - `season || template`
    */
   function createSheet () {
     ss.insertSheet(name, index, options);
