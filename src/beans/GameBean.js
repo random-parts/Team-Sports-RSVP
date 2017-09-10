@@ -172,8 +172,10 @@ function game (spreadsheet) {
    */
   function _formatField () {
     if (RegExp(/rescheduled/i).test(field)) { _formatCancelledGame() }
-    var venue = '\n' + field;
-    _formatHeader(venue);
+    else {
+      var venue = '\n' + field;
+      _formatHeader(venue);
+    }
   }
   
   /**
