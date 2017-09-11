@@ -29,26 +29,7 @@
  */
 function emailService () {
   var ss = Config.spreadsheet();
-  
-  /**
-   * ---
-   * Checks the number of days until the next gameday against a list 
-   * of number-of-days-before the next game that emails should be sent.
-   *
-   * @memberof! emailService#
-   * @return {Boolean}
-   */
-  function isEmailDay () {
-    var next_game = scheduleService().nextGameDay();
-    var email_days = settings().email.daysBeforeGame;
-    // Convert dates into Day of the year
-    var today = utils(ss).date.asDayOfYear(new Date());
-    var gameday = utils(ss).date.asDayOfYear(new Date(next_game[1][0]));
-    var days_until_game = (gameday - today);
-    
-    return Boolean(email_days.indexOf(days_until_game) != -1);
-  }
-  
+
   /**
    * ---
    * Send email notices for all games scheduled to be emailed today.
@@ -267,11 +248,9 @@ function emailService () {
   
   /**
    * @typedef {emailService} emailService.PublicInterface
-   * @property {Funtion} isEmailDay - [emailService().isEmailDay()]{@link emailService#isEmailDay}
    * @property {Funtion} sendEmail - [emailService().sendMail()]{@link emailService#sendEmail}
    */
   return {
-    isEmailDay: isEmailDay,
     sendMail: sendMail
   }
 }

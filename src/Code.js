@@ -103,9 +103,9 @@ function onDailyTrigger () {
   
   // Update the displayed schedule
   scheduleService().update();
-  
-  // Check if emails should be sent; if so check that there is a form to send; send
-  if (emailService().isEmailDay()) { emailService().sendMail() } 
+
+  // Run email task
+  emailService().sendMail()
 }
 
 /**
