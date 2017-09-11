@@ -16,7 +16,7 @@
 *******************************************************************************/
 
 /**
- * @overview Mananges the Gameday Email notification tasks
+ * @overview Mananges the Email notification tasks
  * @license Apache License, Version 2.0
  * @property {emailService.PublicInterface} - available public methods
  */
@@ -51,8 +51,8 @@ function emailService () {
   
   /**
    * ---
-   * Set-up email notices for the next gameday with information grouped 
-   * by each game for that day.
+   * Send email notices for all games scheduled to be emailed today.
+   * Email schedule is based on `settings().email.daysBeforeGame`.
    *
    * @memberof! emailService#
    */
@@ -131,22 +131,52 @@ function emailService () {
   
   /**
    * ---
-   * Gathers the list of emails for the squad mates that have not yet 
-   * rsvp'd to the next gameday's games. 
+   * Get the list of games to email by checking if the value between today and
+   * the upcoming game matches a value in the `dayBeforeGame` setting.
+   *
+   * @return {Array}
+   * | return | value kind
+   * |---|---
+   * | `games_to_email[0][i]` | Array of Game column positions
+   * | `gamee_to_email[1][i]` | Array of Dates for games to email
+   */
+  function _getGamesToEmail () {
+    var c_dates = schedule(ss).compositeDates();
+    var email_days = settings().email.daysBeforeGame;
+    var today = utils(ss).date.asDayOfYear(new Date());
+    var game_dates = [];
+    var game_columns = [];
+
+    for (var i = 0; i < c_dates.length; i++) {
+      var current_game = utils(ss).date.asDayOfYear(new Date(c_dates[i]));
+
+      if (email_days.indexOf((current_game - today)) != -1) {
+        game_dates.push(c_dates[i]);
+        game_columns.push(schedule(ss).gameColumn(c_dates[i]));
+      }
+    }
+
+    return [game_columns, game_dates];
+  }
+
+  /**
+   * ---
+   * Gathers the list of emails for the squad mates that have not yet
+   * rsvp'd to the game(s) set to be emailed.
    *
    * @param {Array} squad_emails - squad list to match blank column rsvps
-   * @param {Array} upcoming_gameday - next gameday info to check rsvps against
+   * @param {Array} rsvp_games - games to check rsvps against
    * @return {Array} list of emails that have not rsvp'd
    */
-  function _getSendList (squad_emails, upcoming_gameday) {
-    var rsvp_col = schedule(ss).rsvp.apply(null, upcoming_gameday[0]);
+  function _getSendList (squad_emails, rsvp_games) {
+    var rsvp_col = schedule(ss).rsvp.apply(null, rsvp_games[0]);
     var squad_emails = squad_emails || [];
     var email_list = [];
-    
-    upcoming_gameday[0].forEach(function (e, oi) {
+
+    rsvp_games[0].forEach(function (e, oi) {
       var game_list = [];
-      // When no one has rsvp'd; email everyone and check next gameday
-      if (typeof rsvp_col[oi] == "undefined") {
+      // When rsvp_col is empty email everyone
+      if (typeof rsvp_col == "undefined" || typeof rsvp_col[oi] == "undefined") {
         // Filter squad rows without an email address
         email_list.push(squad_emails
                   .filter(function (r) { return (typeof r[1] != "undefined") }));
@@ -167,8 +197,8 @@ function emailService () {
   
   /**
    * ---
-   * Gathers the template values into per game objects 
-   * for the upcoming gameday email notifications
+   * Gathers the template values into per game objects
+   * for today's email notifications
    *
    * @return {Array}
    * ```
@@ -182,10 +212,10 @@ function emailService () {
    * ```
    */
   function _getSendMailSets () {
-    var upcoming_gameday = scheduleService().nextGameDay();
-    var game_info = schedule(ss).composite.apply(null, upcoming_gameday[0]);
+    var rsvp_games = _getGamesToEmail();
+    var game_info = schedule(ss).composite.apply(null, rsvp_games[0]);
     var squad_emails = squad(ss).emails();
-    var send_list = _getSendList(squad_emails, upcoming_gameday);
+    var send_list = _getSendList(squad_emails, rsvp_games);
     var filtered_emails = squad_emails.filter(function (e) { return (typeof e[1] != "undefined") })
     var mail_sets = [];
 
@@ -195,7 +225,7 @@ function emailService () {
      *
      * @this form
      */
-    upcoming_gameday[1].forEach(function (e, oi) {
+    rsvp_games[1].forEach(function (e, oi) {
       var to_sendmail = [];
       var obj = {};
       
