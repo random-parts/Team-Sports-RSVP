@@ -11,7 +11,7 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 **Install options (pick one):**
 
 - Use the link above to install the add-on from the chrome webstore
-- Use [node-google-apps-script](https://www.npmjs.com/package/node-google-apps-script) to add the script to google drive
+- Fork/Clone this repo and use [node-google-apps-script](https://www.npmjs.com/package/node-google-apps-script) to add the script to your Google Apps Script project
 - Copy & paste the script into a new Google Apps Script file
 
 **Set-up a new season sheet:**
@@ -36,14 +36,24 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
-v1.2.12
-
-- Displays the Venue/Field name
-- Past game columns [rsvp columns & opponent cell] are now grayed out
+v1.2.15
 
 Fixes
 
-- Roster copy on new season sheets with now only copy the content instead of content and formatting.
+- Will now check for and require a unique name on sheet/season creation
+- Empty roster rows will no longer cause a sending email error
+- RSVP Email service will look beyond the next gameday and send emails for any game within the settings time frame  [default: 1 & 3 days before game]
+- Game headers will now format properly on cancelled games
+
+
+v1.2.12
+
+- Displays the Venue/Field name.
+- Past game columns [rsvp cells & opponent cell] are now grayed out.
+
+Fixes
+
+- Roster copy on new season sheets will now only copy the content instead of content and formatting.
 
 
 [1]: https://developers.google.com/apps-script/guides/triggers/installable#restrictions
