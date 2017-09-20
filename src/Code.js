@@ -28,7 +28,7 @@
 /**
  * @file Contains the controller methods used to orchestrate script actions
  * @license Apache License, Version 2.0
- * @version 1.2.15
+ * @version 1.2.16
  */
 
 /**
@@ -250,7 +250,9 @@ function onRunSchedule () {
 function onRunEmail () {
   var ss = Config.spreadsheet();
   var isEmpty = ss.getRangeByName("squadEmail").isBlank();
-  if (!isEmpty && ui().confirm.sendemail() == true) { emailService().sendMail() }
+  if (!isEmpty && ui().confirm.sendemail() == true) {
+    emailService().sendMail(scheduleService().nextGameDay())
+  }
 }
   
 /**

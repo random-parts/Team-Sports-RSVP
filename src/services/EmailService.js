@@ -36,9 +36,10 @@ function emailService () {
    * Email schedule is based on `settings().email.daysBeforeGame`.
    *
    * @memberof! emailService#
+   * @param {Array=} [nextGameDay] list of games for the upcoming gameday
    */
   function sendMail () {
-    var values = _getSendMailSets();
+    var values = _getSendMailSets(arguments[0]);
     var ss_url = ss.getUrl();
     /**
      * ---
@@ -175,12 +176,13 @@ function emailService () {
 
     return email_list;
   }
-  
+
   /**
    * ---
    * Gathers the template values into per game objects
    * for today's email notifications
    *
+   * @param {Array=} [nextGameDay] list of games for the upcoming gameday
    * @return {Array}
    * ```
    * //array of objects - of game data and sendmail value sets
@@ -193,7 +195,7 @@ function emailService () {
    * ```
    */
   function _getSendMailSets () {
-    var rsvp_games = _getGamesToEmail();
+    var rsvp_games = arguments[0] || _getGamesToEmail();
     var game_info = schedule(ss).composite.apply(null, rsvp_games[0]);
     var squad_emails = squad(ss).emails();
     var send_list = _getSendList(squad_emails, rsvp_games);
