@@ -92,7 +92,7 @@ function teamService () {
 
     // Map returning squad & blank place holders for non-returning squad
     var returning = full_squad.map(function (e, i) {
-      return e = RegExp(/y+/i).test(e[2]) ? e : ["","","","",""];
+      return e = RegExp(/y+/i).test(e[2]) ? [e[0],e[1],"","",e[4]] : ["","","","",""];
     });
 
     this.returning = returning;
