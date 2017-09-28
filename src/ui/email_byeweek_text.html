@@ -1,0 +1,13 @@
+No <?= team_name ?> game this week.
+
+<? if (next_game) { ?>
+The next game is on:
+<?= game_date ?> @ <?= game_time ?>
+<? } else { ?>
+No other games are currently scheduled.
+<? } ?>
+
+
+Link to Google Sheets:
+<?= sheets_url ?>
+
