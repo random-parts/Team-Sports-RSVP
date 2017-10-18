@@ -27,27 +27,87 @@
  * @namespace utils
  * @property {utils.PublicInterface} - available public methods
  */
-function utils (spreadsheet) {
+function utils (spreadsheet, time_zone) {
   var spreadsheet;
   var ss = spreadsheet || Config.spreadsheet();
-  
+  var time_zone = time_zone || ss.getSpreadsheetTimeZone();
+
+  /**
+   * ---
+   * Finds the most common occurrence and count of an element in an array.
+   * And checks if it is the [2/3rd] majority of occurrences.
+   *
+   * @memberof! utils#
+   * @param {Array} arr - the array to check
+   * @return {Array}
+   * ```
+   * [0][i] the most common elements;
+   * [1] count
+   * [2] is_majority
+   * ```
+   */
+  function getMostCommon (arr) {
+    var arr = arr || [];
+    var high_count;
+    // Return if only one value
+    if (!arr.length) { return [[arr], 1] }
+
+    // Reduce the elements into key:value object
+    var count = arr.reduce(function (r, k) {
+                  r[k] ? r[k]++ : r[k] = 1;
+                  return r;
+                }, {});
+
+    // Return the key(s) with the highest occurrence
+    var common = Object.keys(count).reduce(function (r, k, i) {
+                   if (!i || count[k] > count[r[0]]) {
+                     high_count = count[k];
+                     return [(parseInt(k) || k)];
+                   }
+                   // Add additional keys equal to highest occurrence
+                   if (count[k] === count[r[0]]) { r.push((parseInt(k) || k)) }
+                   return r;
+                 }, []);
+
+    // Check if most common element is also 2/3rd majority
+    var is_majority = (arr.length >= 3)
+          ? (Math.floor(.67 * arr.length) <= high_count)
+          : false;
+
+    return [common, high_count, is_majority];
+  }
 /*******************************************************************************
 *                                utils().date                                  *
 *******************************************************************************/
 
   /**
    * ---
-   * Converts a date_time object into it's day number of the year 
+   * Converts datetime objects into it's day number of the Week
+   * `1 = Monday...7 =Sunday`
+   *
+   * @memberof! utils#
+   * @param {Array|Date} datetime - date object or array of date objects
+   * @return {Array|Number}
+   */
+  function dayNumberOfWeek (datetime) {
+     return datetime.length
+       ? datetime.map(function (e) { return e.getDay() })
+       : datetime.getDay();
+  }
+
+  /**
+   * ---
+   * Converts a datetime object into it's day number of the year
    * for date comparison.
    *
    * @memberof! utils#
-   * @param {Date} datetime a date object
-   * @return {Number}
+   * @param {Array|Date} datetime -  date object or array of date objects
+   * @return {Array|Number}
    */
-  function dayOfYear (datetime) {
-    var time_zone = ss.getSpreadsheetTimeZone();
-  
-    return parseInt(Utilities.formatDate(new Date(datetime), time_zone, "D"));
+  function dayNumberOfYear (datetime) {
+    return datetime.length
+      ? datetime.map(function (e) { return parseInt(Utilities.formatDate(new Date(e), time_zone, "D"))})
+      : parseInt(Utilities.formatDate(new Date(datetime), time_zone, "D"));
   }
 
   /**
@@ -144,7 +204,7 @@ function utils (spreadsheet) {
              .timeBased()
              .atHour(6)
              .everyDays(1)
-             .inTimezone(ss.getSpreadsheetTimeZone())
+             .inTimezone(time_zone)
              .create();
   }
   
@@ -202,7 +262,9 @@ function utils (spreadsheet) {
   
   /**
    * @typedef {utils} utils.PublicInterface
-   * @property {Function} dayOfYear - [utils().date.asDayOfYear()]{@link utils#dayOfYear}
+   * @property {Function} getMostCommon - [utils().getMostCommon()]{@link utils#getMostCommon}
+   * @property {Function} dayNumberOfWeek - [utils().date.asDayOfWeek()]{@link utils#dayNumberOfWeek}
+   * @property {Function} dayNumberOfYear - [utils().date.asDayOfYear()]{@link utils#dayNumberOfYear}
    * @property {Function} rawDateTime - [utils().date.makeDateTime()]{@link utils#rawDateTime}
    * @property {Function} fetchQuoteOfTheDay - [utils().form.fetchQuote()]{@link utils#fetchQuoteOfTheDay}
    * @property {Function} clearTriggers - [utils().script.clean.triggers()]{@link utils#clearTriggers}
@@ -210,8 +272,10 @@ function utils (spreadsheet) {
    * @property {Function} gasRetry - [utils().script.retry()]{@link utils#gasRetry}
    */
   return {
+    getMostCommon: getMostCommon,
     date: {
-      asDayOfYear: dayOfYear,
+      asDayOfWeek: dayNumberOfWeek,
+      asDayOfYear: dayNumberOfYear,
       makeDateTime: rawDateTime
     },
     form: {
