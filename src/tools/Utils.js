@@ -82,32 +82,50 @@ function utils (spreadsheet, time_zone) {
 
   /**
    * ---
-   * Converts datetime objects into it's day number of the Week
-   * `1 = Monday...7 =Sunday`
+   * Formats date objects into strings or numbers
+   * and returns the date objects with the format
    *
    * @memberof! utils#
-   * @param {Array|Date} datetime - date object or array of date objects
-   * @return {Array|Number}
+   * @param {String=} - the format type
+   * @param {Array|Date=} - the date object or array of date objects to format
+   * @return {Array|Date}
+   * ```
+   * [i][0] formatted date
+   * [i][1] date object
+   * ```
    */
-  function dayNumberOfWeek (datetime) {
-     return datetime.length
-       ? datetime.map(function (e) { return e.getDay() })
-       : datetime.getDay();
-  }
+  function formatDateTime () {
+    var d = arguments.length
+      ? (typeof arguments[1] != 'undefined'
+        ? (arguments[1].length ? arguments[1] : [arguments[1]]) : [new Date()])
+      : [new Date()];
+    var f = {
+      split: ["EEEE, MMMM dd","h:mm a"],
+      yearday: "D"
+    }
 
-  /**
-   * ---
-   * Converts a datetime object into it's day number of the year
-   * for date comparison.
-   *
-   * @memberof! utils#
-   * @param {Array|Date} datetime -  date object or array of date objects
-   * @return {Array|Number}
-   */
-  function dayNumberOfYear (datetime) {
-    return datetime.length
-      ? datetime.map(function (e) { return parseInt(Utilities.formatDate(new Date(e), time_zone, "D"))})
-      : parseInt(Utilities.formatDate(new Date(datetime), time_zone, "D"));
+    return d.map(function (e) {
+      switch (true) {
+        // Format and splits into [date, time]
+        case this == "split":
+          return [[Utilities.formatDate(new Date(e), tz, f.split[0]),
+                   Utilities.formatDate(new Date(e), tz, f.split[1])],
+                   new Date(e)];
+          break;
+        // Day number of the week: `1 = Monday...7 =Sunday`
+        case this == "weekday":
+          return [e.getDay(), new Date(e)];
+          break;
+        // Day number of the year
+        case this == "yearday":
+          return [Number(Utilities.formatDate(new Date(e), tz, f.yearday)),
+                  new Date(e)];
+          break;
+        // Current datetime
+        default:
+          return new Date(e);
+      }
+    },arguments[0]);
   }
 
   /**
@@ -263,8 +281,7 @@ function utils (spreadsheet, time_zone) {
   /**
    * @typedef {utils} utils.PublicInterface
    * @property {Function} getMostCommon - [utils().getMostCommon()]{@link utils#getMostCommon}
-   * @property {Function} dayNumberOfWeek - [utils().date.asDayOfWeek()]{@link utils#dayNumberOfWeek}
-   * @property {Function} dayNumberOfYear - [utils().date.asDayOfYear()]{@link utils#dayNumberOfYear}
+   * @property {Function} formatDateTime - [utils().date.format()]{@link utils#formatDateTime}
    * @property {Function} rawDateTime - [utils().date.makeDateTime()]{@link utils#rawDateTime}
    * @property {Function} fetchQuoteOfTheDay - [utils().form.fetchQuote()]{@link utils#fetchQuoteOfTheDay}
    * @property {Function} clearTriggers - [utils().script.clean.triggers()]{@link utils#clearTriggers}
@@ -274,8 +291,7 @@ function utils (spreadsheet, time_zone) {
   return {
     getMostCommon: getMostCommon,
     date: {
-      asDayOfWeek: dayNumberOfWeek,
-      asDayOfYear: dayNumberOfYear,
+      format: formatDateTime,
       makeDateTime: rawDateTime
     },
     form: {
