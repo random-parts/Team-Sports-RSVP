@@ -30,7 +30,7 @@
 function scheduleService () {
   var ss = Config.spreadsheet();
   var ss_id = ss.getId();
-  var time_zone = ss.getSpreadsheetTimeZone();
+  var tz = ss.getSpreadsheetTimeZone();
   var gamedate_range = ss.getRangeByName("dateColumns");
 
   /**
@@ -89,8 +89,8 @@ function scheduleService () {
       }
       
       // Check if the cancelled game is the same game being rescheduled or a different game
-      while (isCancelled(this.column) == true && isBeingRescheduled == true) { 
-        var a = Utilities.formatDate(new Date(composite_dates[this.column]), time_zone, "EEE MMM d");
+      while (isCancelled(this.column) == true && isBeingRescheduled == true) {
+        var a = Utilities.formatDate(new Date(composite_dates[this.column]), tz, "EEE MMM d");
         var b = s[i][0].replace(/-/, " ");
         if (a != b) {
            column_offset += 1;
@@ -162,16 +162,16 @@ function scheduleService () {
    */
   function getNextGameDayCols () {
     var c_dates = schedule().compositeDates();
-    var today = utils(ss).date.asDayOfYear(new Date());
+    var today = utils(ss).date.format("yearday");
     var game_dates = [];
     var game_columns = [];
     
     // Compares current column with next column for multiple games in one day
     for (var i = 0; i < c_dates.length; i++) {
-      var current_date = utils(ss).date.asDayOfYear(new Date(c_dates[i]));
-        
+      var current_date = utils(ss).date.format("yearday", new Date(c_dates[i]));
+
       if (typeof c_dates[i + 1] != "undefined") {
-        var next_date = utils(ss).date.asDayOfYear(new Date(c_dates[i + 1]));
+        var next_date = utils(ss).date.format("yearday", new Date(c_dates[i + 1]));
 
       } else { 
         var next_date = false; 
