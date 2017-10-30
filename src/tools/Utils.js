@@ -34,14 +34,14 @@ function utils (spreadsheet, tz) {
 
   /**
    * ---
-   * Finds the most common occurrence and count of an element in an array.
-   * And checks if it is the [2/3rd] majority of occurrences.
+   * Get the most common occurrence and count of an element in an array.
+   * Also, check if it is the [2/3rd] majority of occurrences.
    *
    * @memberof! utils#
    * @param {Array} arr - the array to check
    * @return {Array}
    * ```
-   * [0][i] the most common elements;
+   * [0][i] most common elements
    * [1] count
    * [2] is_majority
    * ```
@@ -49,33 +49,34 @@ function utils (spreadsheet, tz) {
   function getMostCommon (arr) {
     var arr = arr || [];
     var high_count;
-    // Return if only one value
-    if (!arr.length) { return [[arr], 1] }
+      // Return if only one value
+      if (!arr.length) { return [[arr], 1] }
 
     // Reduce the elements into key:value object
     var count = arr.reduce(function (r, k) {
-                  r[k] ? r[k]++ : r[k] = 1;
-                  return r;
-                }, {});
+      r[k] ? r[k]++ : r[k] = 1;
+      return r;
+    }, {});
 
     // Return the key(s) with the highest occurrence
     var common = Object.keys(count).reduce(function (r, k, i) {
-                   if (!i || count[k] > count[r[0]]) {
-                     high_count = count[k];
-                     return [(parseInt(k) || k)];
-                   }
-                   // Add additional keys equal to highest occurrence
-                   if (count[k] === count[r[0]]) { r.push((parseInt(k) || k)) }
-                   return r;
-                 }, []);
+      if (!i || count[k] > count[r[0]]) {
+        high_count = count[k];
+        return [(parseInt(k) || k)];
+      }
+      // Add additional keys equal to highest occurrence
+      if (count[k] === count[r[0]]) { r.push((parseInt(k) || k)) }
+      return r;
+    }, []);
 
     // Check if most common element is also 2/3rd majority
     var is_majority = (arr.length >= 3)
-          ? (Math.floor(.67 * arr.length) <= high_count)
-          : false;
+      ? (Math.floor(.67 * arr.length) <= high_count)
+      : false;
 
     return [common, high_count, is_majority];
   }
+
 /*******************************************************************************
 *                                utils().date                                  *
 *******************************************************************************/
