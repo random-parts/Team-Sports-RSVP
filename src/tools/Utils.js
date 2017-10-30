@@ -27,10 +27,10 @@
  * @namespace utils
  * @property {utils.PublicInterface} - available public methods
  */
-function utils (spreadsheet, time_zone) {
+function utils (spreadsheet, tz) {
   var spreadsheet;
   var ss = spreadsheet || Config.spreadsheet();
-  var time_zone = time_zone || ss.getSpreadsheetTimeZone();
+  var tz = tz || ss.getSpreadsheetTimeZone();
 
   /**
    * ---
@@ -83,49 +83,47 @@ function utils (spreadsheet, time_zone) {
   /**
    * ---
    * Formats date objects into strings or numbers
-   * and returns the date objects with the format
    *
    * @memberof! utils#
    * @param {String=} - the format type
    * @param {Array|Date=} - the date object or array of date objects to format
-   * @return {Array|Date}
-   * ```
-   * [i][0] formatted date
-   * [i][1] date object
-   * ```
+   * @return {Number[]|String[][]}
    */
   function formatDateTime () {
-    var d = arguments.length
+    var a = arguments.length
       ? (typeof arguments[1] != 'undefined'
         ? (arguments[1].length ? arguments[1] : [arguments[1]]) : [new Date()])
       : [new Date()];
-    var f = {
+    var df = {
       split: ["EEEE, MMMM dd","h:mm a"],
       yearday: "D"
-    }
+    };
 
-    return d.map(function (e) {
+    var format = a.map(function (e) {
       switch (true) {
         // Format and splits into [date, time]
         case this == "split":
-          return [[Utilities.formatDate(new Date(e), tz, f.split[0]),
-                   Utilities.formatDate(new Date(e), tz, f.split[1])],
-                   new Date(e)];
+          return [Utilities.formatDate(new Date(e), tz, df.split[0]),
+                  Utilities.formatDate(new Date(e), tz, df.split[1])];
           break;
+
         // Day number of the week: `1 = Monday...7 =Sunday`
         case this == "weekday":
-          return [e.getDay(), new Date(e)];
+          return e.getDay();
           break;
+
         // Day number of the year
         case this == "yearday":
-          return [Number(Utilities.formatDate(new Date(e), tz, f.yearday)),
-                  new Date(e)];
+          return Number(Utilities.formatDate(new Date(e), tz, df.yearday));
           break;
+
         // Current datetime
         default:
           return new Date(e);
       }
-    },arguments[0]);
+    }, arguments[0]);
+
+    return format;
   }
 
   /**
@@ -222,7 +220,7 @@ function utils (spreadsheet, time_zone) {
              .timeBased()
              .atHour(6)
              .everyDays(1)
-             .inTimezone(time_zone)
+             .inTimezone(tz)
              .create();
   }
   
