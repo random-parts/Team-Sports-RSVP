@@ -23,15 +23,18 @@
   <tr>
     <td>
       <table align="center" border="0" cellspacing="0" cellpadding="0">
-<? if (next_game) { ?>
         <tr>
-          <td align="center" width="100%"><h2>The next game is on:</h2></td>
+          <td align="center" width="100%"><h2>No <?= team_name ?> game this week. (<?= game_date ?>)</h2></td>
+        </tr>
+<? if (next_date) { ?>
+        <tr>
+          <td align="center" width="100%"><h3>The NEXT game is on:</h3></td>
         </tr>
         <tr>
-          <td><h2><?= game_date ?> @ <?= game_time ?></h2></td>
+          <td align="center" width="100%"><h3><?= next_date ?> @ <?= next_time ?></h3></td>
         </tr>
         <tr>
-          <td align="center" width="100%"><h2><?= game_date ?> @ <?= game_time ?></h2></td>
+          <td align="center" width="100%"><p>vs. <?= next_opp ?><br/>on <?= next_field ?></p></td>
         </tr>
 <? } else { ?>
         <tr>
@@ -47,6 +50,9 @@
   </tr>
 </table>
 <table align="center" width="100%" border="0" cellspacing="10px" cellpadding="0">
+  <tr>
+    <td></td>
+  </tr>
     <tr>
     <td>Link to Google Sheets:</td>
   </tr>

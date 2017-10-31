@@ -1,8 +1,14 @@
-No <?= team_name ?> game this week.
+No <?!= team_name ?> game this week. (<?= game_date ?>)
 
-<? if (next_game) { ?>
-The next game is on:
-<?= game_date ?> @ <?= game_time ?>
+<? if (next_date) { ?>
+The NEXT game is on:
+
+<?= next_date ?> @ <?= next_time ?>
+
+
+vs.
+
+<?!= next_opp ?>
 <? } else { ?>
 No other games are currently scheduled.
 <? } ?>
@@ -10,4 +16,3 @@ No other games are currently scheduled.
 
 Link to Google Sheets:
 <?= sheets_url ?>
-

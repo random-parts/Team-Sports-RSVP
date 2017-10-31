@@ -26,9 +26,9 @@
         <? if (next_date) { ?>
         <tr>
           <td align="center" width="100%">
-            <p>
+            <h3>
               <?= first_name ?>,<br/><br/>Please pay your <b><?= team_name ?></b> team fees before <b><?= next_number ?></b> on:
-            </p>
+            </h3>
           </td>
         </tr>
         <tr>
@@ -37,16 +37,16 @@
         <? } else { ?>
         <tr>
           <td align="center" width="100%">
-            <p>
+            <h3>
               <?= first_name ?>,<br/><br/>Please pay your team fees for <b><?= team_name ?></b>
-           </p>
+           </h3>
          </td>
         </tr>
         <? } ?>
       </table>
     </td>
   </tr>
-  <tr><td></td></tr>
+  <tr><td><br/></td></tr>
 </table>
 <table align="center" width="100%" border="0" cellspacing="10px" cellpadding="0">
     <tr>

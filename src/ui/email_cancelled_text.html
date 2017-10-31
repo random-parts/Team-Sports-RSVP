@@ -1,6 +1,20 @@
-The <?= team_name ?> game on:
+The <?!= team_name ?> game on:
+
 <?= game_date ?> @ <?= game_time ?>
+
+
 has been CANCELLED
+
+<? if (next_date) { ?>
+The next game is on:
+
+<?= next_date ?> @ <?= next_time ?>
+
+vs.
+<?!= next_opp ?>
+<? } else { ?>
+No other games are currently scheduled.
+<? } ?>
 
 
 Link to Google Sheets:

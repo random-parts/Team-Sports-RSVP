@@ -32,6 +32,25 @@
         <tr>
           <td align="center" width="100%"><h2>has been <font color="red" weight="bold">CANCELLED</font></h2></td>
         </tr>
+        <? if (next_date) { ?>
+        <tr>
+          <td align="center" width="100%"><hr></td>
+        </tr>
+
+        <tr>
+          <td align="center" width="100%"><h3>The next game is on:</h3></td>
+        </tr>
+        <tr>
+          <td align="center" width="100%"><h3><?= next_date ?> @ <?= next_time ?></h3></td>
+        </tr>
+        <tr>
+          <td align="center" width="100%"><p>vs. <?= next_opp ?><br/>on <?= next_field ?></p></td>
+        </tr>
+        <? } else { ?>
+        <tr>
+          <td align="center" width="100%"><h3><font color="red" weight="bold">No other games are currently scheduled.</font></h3></td>
+        </tr>
+        <? } ?>
       </table>
     </td>
   </tr>
