@@ -29,228 +29,454 @@
  */
 function emailService () {
   var ss = Config.spreadsheet();
+  var team_name = team(ss).name;
+  var tz = ss.getSpreadsheetTimeZone();
+  var sets = {
+    today: curateTodaysEmails,
+    other: curateManualEmails,
+    next: curateNextGameEmails
+  }
 
   /**
    * ---
-   * Send email notices for all games scheduled to be emailed today.
-   * Email schedule is based on `settings().email.daysBeforeGame`.
+   * Creates and sends emails.
    *
    * @memberof! emailService#
-   * @param {Array=} [nextGameDay] list of games for the upcoming gameday
+   * @param {String=} [set_type] - type of mail set to work with
+   * @param {?=} argument[1] - option arguments for the set method
    */
-  function sendMail () {
-    var values = _getSendMailSets(arguments[0]);
+  function sendMail (set_type) {
+    var set_type = set_type || "today";
+    var arg = arguments[1] || null;
+    var email_sets = sets[set_type] ? sets[set_type].call(email(),arg) : null;
+      if (!email_sets) { return }
     var ss_url = ss.getUrl();
-    /**
-     * ---
-     * Set & send each individual email
-     *
-     * @this email
-     */
-    values.forEach(function (e, oi) {
+
+    for (var email_type in email_sets) {
       // Only process emails when there is a valid email list
-      if (e.to_send.length) {
-        this.time_zone = ss.getSpreadsheetTimeZone();
-        this.team_name = team().name;
-        this.email_type = e.email_type;
-        this.templates = _getEmailTemplates(e.email_type);
-        this.sheets_url = ss_url;
-        this.game_date = e.game_date;
-        this.game_time = e.game_date;
-        this.game_opp = e.game_opponent;
-
-        for (var ii = 0; ii < e.to_send.length; ii++) {
-          this.first_name = e.to_send[ii][0][0] || "";
-          this.email = e.to_send[ii][0][1];
-
-          if (e.email_type == "Rsvp") {
-            this.yes_link = e.to_send[ii][1][0];
-            this.probably_link = e.to_send[ii][1][1];
-            this.doubtful_link = e.to_send[ii][1][2];
-            this.no_link = e.to_send[ii][1][3];
+      if (email_sets[email_type].email.length) {
+        /**
+         * Process each {email_type[]}'s set of emails
+         * @this email()
+         */
+        email_sets[email_type].email.forEach(function (e) {
+          this.time_zone = tz;
+          this.team_name = e.team_name;
+          this.email_type = email_type;
+          this.subject = e.subject;
+          this.game_field = e.game_field;
+          this.sheets_url = ss_url;
+          this.game_date = e.game_date;
+          this.game_time = e.game_time;
+          this.game_opp = e.game_opp;
+          if (typeof email_sets[email_type].next_game != "undefined") {
+            this.next_date = email_sets[email_type].next_game[1];
+            this.next_number = email_sets[email_type].next_game[0].split('\n')[0];
+            this.next_time = email_sets[email_type].next_game[2];
+            this.next_opp = email_sets[email_type].next_game[3];
+            this.next_field = email_sets[email_type].next_game[0].split('\n')[1];
           }
+          // Create and send the above email for each email address in `e.to_send`
+          for (var i = 0; i < e.to_send.length; i++) {
+            if (email_type == "Rsvp" || email_type == "Returning") {
+              this.first_name = e.to_send[i][0][0];
+              this.email = e.to_send[i][0][1];
+              this.yes_link = e.to_send[i][1][0];
+              this.probably_link = e.to_send[i][1][1];
+              this.doubtful_link = e.to_send[i][1][2];
+              this.no_link = e.to_send[i][1][3];
+            } else {
+              this.first_name = e.to_send[i][0];
+              this.email = e.to_send[i][1];
+            }
+            // Use exponential backoff to account for untimely server issues
+            utils(ss).script.retry(this.send);
+          }
+        }, email());
+      }
+    }
+  }
 
-          var email_body = this.createMessage();
+  /**
+   * ---
+   * Gathers all emails that are not strictly `datetime` sensitive
+   *
+   * @memberof! emailService#
+   * @this email()
+   * @param {String=} type - type of email requested
+   * @return {
+   *   Debt: {
+   *     email:Array.<{length}>,
+   *     next_game: Array[]
+   *   },
+   *   Returning: {
+   *     email: Array.<{length}>
+   *   }
+   * }
+   */
+  function curateManualEmails (type) {
+    var type = (typeof type != "undefined") ? type.toLowerCase() : "";
+    var squad_emails = squad(ss).emails();
+      if (!squad_emails[1].length) { return }
+    var next_game, debt = [], returning = [];
 
-          this.html_body = HtmlService.createHtmlOutput(email_body[0].evaluate())
-                                      .getContent();
+    // Set common values for manual/other emails
+    this.team_name = team_name;
 
-          this.text_body = email_body[1].evaluate()
-                                        .getContent();
-          // Use exponential backoff to account for untimely server issues
-          utils(ss).script.retry(this.send);
+    switch (true) {
+      //** Get Debt emails **//
+      case type == "debt":
+        this.email = _getDebtInfo(squad_emails);
+        debt.push(this.debtEmail());
+        next_game = scheduleService().nextActiveGame();
+        break;
+
+      //** Get Returning squad emails **//
+      case type == "returning":
+        this.email = _getReturningInfo(squad_emails);
+        returning.push(this.returningEmail());
+        break;
+
+      default:
+        //
+    }
+
+    return {
+      Debt: {
+        email: debt,
+        next_game: next_game
+      },
+      Returning: {
+        email: returning
+      }
+    }
+  }
+
+  /**
+   * ---
+   * Gathers all of the emails for the `nextGameDay()`,
+   * and/or bye-week, regardless if `_isEmailDay()` or not.
+   *
+   * @memberof! emailService#
+   * @this email()
+   * @return {
+   *   Byeweek: {
+   *     email:Array.<{length}>,
+   *     next_game: Array[]
+   *   },
+   *   Cancelled: {
+   *     email:Array.<{length}>,
+   *     next_game: Array[]
+   *   },
+   *   Rsvp: {
+   *     email: Array.<{length}>
+   *   }
+   * }
+   */
+  function curateNextGameEmails () {
+    var squad_emails = squad(ss).emails();
+      if (!squad_emails[1].length) { return }
+    var n_gameday = scheduleService().nextGameDay();
+      if (typeof n_gameday[0] == "undefined") { return }
+    var byeweeks = scheduleService().getByeWeeks(null, true);
+    var next_cols = n_gameday.reduce(function (r, e) { return r.concat(e[0]) }, []);
+    var game_info = schedule(ss).composite.apply(null, next_cols);
+    var bye_week = [], cancelled = [], rsvp = [];
+    // Set common values
+    this.team_name = team_name;
+    this.email = squad_emails[1];
+
+    //** Check for Bye-week Emails **//
+    if (byeweeks.length) {
+      var n_yearday = utils(ss,tz).date.format("yearday", n_gameday[0][1][0]);
+      var today = utils(ss,tz).date.format("yearday")[0];
+      // Check if there is a Bye-week before the next gameday
+      if (n_yearday[0] > (byeweeks[0][0] + 7) && byeweeks[0][0] > today) {
+        // Set values for byeweek game only
+        var g_date = utils(ss,tz).date.format("split",
+                                              new Date(byeweeks[0][1].toDateString()));
+        this.game_date = g_date[0][0];
+        // Add the byeweek game set
+        bye_week.push(this.byeweekEmail());
+        // Get the next active game
+        var next_game = next_game || scheduleService().nextActiveGame(byeweeks[0][1]);
+      }
+    }
+    // Loop through the first "n_gameday" games only
+    for (var i = 0; i < n_gameday[0][0].length; i++) {
+      var game_date = utils(ss,tz).date.format("split", n_gameday[0][1][i])[0];
+      // Set common values for next gameday
+      this.game_field = game_info[i][0].split('\n')[1];
+      this.game_opp = game_info[i][3];
+      this.game_date = game_date[0];
+      this.game_time = game_date[1];
+
+      //** Get the Cancelled Email info/Set **//
+      if (game_info[i][0] == "Cancelled") {
+        // Add the cancelled game set
+        cancelled.push(this.cancelledEmail());
+        // Get the next active game
+        var next_game = next_game || scheduleService().nextActiveGame(n_gameday[0][1][i]);
+      } else {
+        //** Get the RSVP Email info/Set **//
+        this.email = _getRSVPInfo(n_gameday[0][1][i], n_gameday[0][0][i], squad_emails);
+
+        // Add the rsvp game set
+        rsvp.push(this.rsvpEmail());
+      }
+    }
+
+    return {
+      Byeweek:  {
+        email: bye_week,
+        next_game: next_game
+      },
+      Cancelled: {
+        email: cancelled,
+        next_game: next_game
+      },
+      Rsvp: {
+        email: rsvp
+      }
+    }
+  }
+  /**
+   * ---
+   * Gathers all of the email sets that should be sent today.
+   *
+   * @memberof! emailService#
+   * @this email()
+   * @return {
+   *   Byeweek: {
+   *     email:Array.<{length}>,
+   *     next_game: Array[]
+   *   },
+   *   Cancelled: {
+   *     email:Array.<{length}>,
+   *     next_game: Array[]
+   *   },
+   *   Rsvp: {
+   *     email: Array.<{length}>
+   *   }
+   * }
+   */
+  function curateTodaysEmails () {
+    var squad_emails = squad(ss).emails();
+      if (!squad_emails[1].length) { return }
+    var game_info = schedule(ss).composite();
+    var c_dates = schedule(ss).compositeDates();
+    var today = utils(ss,tz).date.format("yearday")[0];
+    var byeweeks = scheduleService().getByeWeeks(c_dates, true);
+    var current_games = utils(ss,tz).date.format("yearday", c_dates);
+    var bye_week = [], cancelled = [], rsvp = [];
+
+    for (var i = 0; i < c_dates.length; i++) {
+      // Only process games in the future
+      if (current_games[i] < today) { continue }
+      // Set common values for byeweek and current game
+      this.team_name = team_name;
+      this.game_field = game_info[i][0].split('\n')[1];
+      this.game_opp = game_info[i][3];
+      this.email = squad_emails[1];
+
+      //** Check for Bye-week Emails **//
+      if (byeweeks.length && current_games[i - 1]) {
+        // Check that Bye-week is between the previous and current game
+        if (current_games[i - 1] < byeweeks[0][0] && byeweeks[0][0] < current_games[i]) {
+          if (_isEmailDay(byeweeks[0][0], today)) {
+            // Set values for byeweek game only
+            var g_date = utils(ss,tz).date.format("split",
+                                                  new Date(byeweeks[0][1].toDateString()));
+            this.game_date = g_date[0][0];
+            // Add the byeweek game set
+            bye_week.push(this.byeweekEmail());
+            // Get the next active game
+            var next_game = next_game || scheduleService().nextActiveGame(c_dates[i]);
+          }
         }
       }
-    }, email());
+      //** Check if Current game should have an email sent today **//
+      if (_isEmailDay(current_games[i], today)) {
+        // Set values for current game only (rsvp or cancelled)
+        var game_date = utils(ss,tz).date.format("split", c_dates[i])[0];
+        this.game_date = game_date[0];
+        this.game_time = game_date[1];
+
+        // Get the Cancelled Email Info/Set
+        if (game_info[i][0] == "Cancelled") {
+          // Add the cancelled game set
+          cancelled.push(this.cancelledEmail());
+          // Get the next active game
+          var next_game = next_game || scheduleService().nextActiveGame(c_dates[i]);
+          continue;
+        }
+        //** Get the RSVP Email Info/Set **//
+        var game_col = schedule(ss).gameColumn(c_dates[i]);
+        // Get the rsvp email set with prefilled links
+        this.email = _getRSVPInfo(c_dates[i], game_col, squad_emails);
+        // Add the rsvp game set
+        rsvp.push(this.rsvpEmail());
+      }
+    }
+
+    return {
+      Byeweek:  {
+        email: bye_week,
+        next_game: next_game
+      },
+      Cancelled: {
+        email: cancelled,
+        next_game: next_game
+      },
+      Rsvp: {
+        email: rsvp
+      }
+    }
   }
 
 /******************************************************************************
 *                                  @private                                   *
-******************************************************************************/ 
-  
-  /**
-   * ---
-   * Gets the html & plain text templates by email_type
-   *
-   * @param {String} type of template(s) to make
-   * @return {Array}    
-   * | return | value kind
-   * |---|---
-   * | template[0] | html template
-   * | template[1] | plain text template
-   */
-  function _getEmailTemplates (type) {
-    if (type == "Rsvp") {
-      var html = HtmlService.createTemplateFromFile("email_rsvp");
-      var plain_text = HtmlService.createTemplateFromFile("email_rsvp_text");
-    } else if (type == "Cancelled") {
-      var html = HtmlService.createTemplateFromFile("email_cancelled");
-      var plain_text = HtmlService.createTemplateFromFile("email_cancelled_text");
-    }
+******************************************************************************/
 
-    return [html, plain_text];
-  }
-  
   /**
    * ---
-   * Get the list of games to email by checking if the value between today and
-   * the upcoming game matches a value in the `dayBeforeGame` setting.
+   * Gathers the Email info for current squad mates
+   * that have not yet paid their season fees.
    *
+   * @param {String[][]} emails - current squad mates `[name, email]`
    * @return {Array}
-   * | return | value kind
-   * |---|---
-   * | `games_to_email[0][i]` | Array of Game column positions
-   * | `gamee_to_email[1][i]` | Array of Dates for games to email
+   * ```
+   * [0] name
+   * [1] email
+   * ```
    */
-  function _getGamesToEmail () {
-    var c_dates = schedule(ss).compositeDates();
-    var email_days = settings().email.daysBeforeGame;
-    var today = utils(ss).date.asDayOfYear(new Date());
-    var game_dates = [];
-    var game_columns = [];
+  function _getDebtInfo (emails) {
+    var send_list = [];
+    var paid = squad(ss).getPaidRows();
 
-    for (var i = 0; i < c_dates.length; i++) {
-      var current_game = utils(ss).date.asDayOfYear(new Date(c_dates[i]));
-
-      if (email_days.indexOf((current_game - today)) != -1) {
-        game_dates.push(c_dates[i]);
-        game_columns.push(schedule(ss).gameColumn(c_dates[i]));
-      }
-    }
-
-    return [game_columns, game_dates];
-  }
-
-  /**
-   * ---
-   * Gathers the list of emails for the squad mates that have not yet
-   * rsvp'd to the game(s) set to be emailed.
-   *
-   * @param {Array} squad_emails - squad list to match blank column rsvps
-   * @param {Array} rsvp_games - games to check rsvps against
-   * @return {Array} list of emails that have not rsvp'd
-   */
-  function _getSendList (squad_emails, rsvp_games) {
-    var rsvp_col = schedule(ss).rsvp.apply(null, rsvp_games[0]);
-    var squad_emails = squad_emails || [];
-    var email_list = [];
-
-    rsvp_games[0].forEach(function (e, oi) {
-      var game_list = [];
-      // When rsvp_col is empty email everyone
-      if (typeof rsvp_col == "undefined" || typeof rsvp_col[oi] == "undefined") {
-        // Filter squad rows without an email address
-        email_list.push(squad_emails
-                  .filter(function (r) { return (typeof r[1] != "undefined") }));
-      } else {
-        // Match empty cells in the game column with email addresses
-        for (var ii = 0; ii < squad_emails.length; ii++) {
-          if (!rsvp_col[oi][ii]) {
-            (typeof squad_emails[ii][1] != "undefined")
-              ? game_list.push(squad_emails[ii]) : null;
-          }
+    if (paid.filter(String).length) {
+      // Match empty cells in the paid column with email addresses
+      for (var i = 0; i < emails[0].length; i++) {
+        if (!paid[i]) {
+          // Get all squad mate emails that have not paid
+          (typeof emails[0][i][1] != "undefined") ? send_list.push(emails[0][i]) : null;
         }
-        email_list.push(game_list);
       }
-    });
+    } else { send_list = emails[1]; }
 
-    return email_list;
+    return send_list;
   }
 
   /**
    * ---
-   * Gathers the template values into per game objects
-   * for today's email notifications
+   * Gathers the Email info for current squad mates
+   * that have not yet decided if they are playing next season
+   * and returns with prefilled form links.
    *
-   * @param {Array=} [nextGameDay] list of games for the upcoming gameday
+   * @param {String[][]} emails - current squad mates `[name, email]`
    * @return {Array}
    * ```
-   * //array of objects - of game data and sendmail value sets
-   *
-   * mail_sets = [{
-   *   game_opponent: = {String}
-   *   game_date: {Date},
-   *   to_send: [[name, email], [[prefilled_links {@see form().prefilledLinks}]]]
-   * }]
+   * [0][i][i] [name, email]
+   * [1][i][i] [link,link,link,link]
    * ```
    */
-  function _getSendMailSets () {
-    var rsvp_games = arguments[0] || _getGamesToEmail();
-    var game_info = schedule(ss).composite.apply(null, rsvp_games[0]);
-    var squad_emails = squad(ss).emails();
-    var send_list = _getSendList(squad_emails, rsvp_games);
-    var filtered_emails = squad_emails.filter(function (e) { return (typeof e[1] != "undefined") })
-    var mail_sets = [];
+  function _getReturningInfo (emails) {
+    var send_list = [], sendmail_sets = [];
+    var r = squad(ss).getReturningRows();
 
-    /** 
-     * oi > outer index is the game column
-     * ii > inner index is the values/rows for that coulmn
+    if (r.filter(String).length) {
+      // Match empty cells in the returning/Next? column with email addresses
+      for (var i = 0; i < emails[0].length; i++) {
+        if (!r[i]) {
+          // Get all squad mate emails that have not deceid if they are returning
+          (typeof emails[0][i][1] != "undefined") ? send_list.push(emails[0][i]) : null;
+        }
+      }
+    } else { send_list = emails[1]; }
+    /**
+     * Get each `Returning/Next?` emails' Pre-filled form links
      *
-     * @this form
+     * @inner
+     * @this form()
      */
-    rsvp_games[1].forEach(function (e, oi) {
-      var to_sendmail = [];
-      var obj = {};
-      
+    send_list.forEach(function (e) {
       this.team_form = Config.team_form();
-      
-      if (!send_list[oi].length) { return } // No emails to send for this game
-      
-      if (game_info[oi][0] != "Cancelled") {
-        // Get the prefilled links for each squad mate that needs a game reminder
-        for (var ii = 0; ii < send_list[oi].length; ii++) {
-          this.game_date = e;
-          this.email_address = send_list[oi][ii][1];
-    
-          to_sendmail.push([send_list[oi][ii], this.prefilledLinks()]);
-        }
-      
-        obj.email_type = "Rsvp";
+      this.game_date = "returning";
+      this.email_address = e[1];
 
-      } else {
-        // Use all squad emails for cancelled game notifications
-        // and set to the same to_send position as above
-        for (var ii = 0; ii < filtered_emails.length; ii++) {
-          to_sendmail.push([filtered_emails[ii]]);
-        }
-        
-        obj.email_type = "Cancelled";
-      }
-      // Create the game object
-      obj.game_opponent = game_info[oi][3];
-      obj.game_date = e;
-      obj.to_send = to_sendmail;
-
-      mail_sets.push(obj);
-
+      sendmail_sets.push([e, this.prefilledLinks()]);
     }, form());
 
-    return mail_sets;
+    return sendmail_sets;
   }
-  
+
+  /**
+   * ---
+   * Gathers the RSVP Email List with prefilled links
+   * for the squad mates that have not yet RSVP to the upcoming game.
+   *
+   * @param {Date} game_datetime - games' date object
+   * @param {Number} game_col - the column position of the game
+   * @param {String[][]} emails - current squad mates `[name, email]`
+   * @return {Array}
+   * ```
+   * [0][i][i] [name, email]
+   * [1][i][i] [link,link,link,link]
+   * ```
+   */
+  function _getRSVPInfo (game_datetime, game_col, emails) {
+    var game_date = utils(ss,tz).date.format("split", game_datetime)[0];
+    var rsvp_col = schedule(ss).rsvp.call(null, game_col);
+    var send_list = [], sendmail_sets = [];
+
+    // Get the proper to:email list
+    if (typeof rsvp_col == "undefined") {
+      // Get all vaild squad emails
+      send_list = emails[1];
+    } else {
+      // Match empty cells in the game column with email addresses
+      for (var i = 0; i < emails[0].length; i++) {
+        if (!rsvp_col[0][i]) {
+          // Get email of squad mates that have not rsvp'd
+          (typeof emails[0][i][1] != "undefined") ? send_list.push(emails[0][i]) : null;
+        }
+      }
+    }
+    /**
+     * Get each RSVP emails' Pre-filled form links
+     *
+     * @inner
+     * @this form()
+     */
+    send_list.forEach(function (e) {
+      this.team_form = Config.team_form();
+      this.game_date = game_datetime;
+      this.email_address = e[1];
+
+      sendmail_sets.push([e, this.prefilledLinks()]);
+    }, form());
+
+    return sendmail_sets;
+  }
+
+  /**
+   * ---
+   * Check if an email should be sent for the specified dates
+   *
+   * @param {Date.<number>} gamedate - day number of year
+   * @param {Date.<number>} today - day number of year
+   * @return {Boolean}
+   */
+  function _isEmailDay (gamedate, today) {
+    var event = gamedate || -999;
+    var email_days = settings().email.daysBeforeGame;
+
+    return email_days.indexOf((event - today)) != -1;
+  }
+
   /**
    * @typedef {emailService} emailService.PublicInterface
-   * @property {Funtion} sendEmail - [emailService().sendMail()]{@link emailService#sendEmail}
+   * @property {Funtion} sendMail - [emailService().sendMail()]{@link emailService#sendMail}
    */
   return {
     sendMail: sendMail

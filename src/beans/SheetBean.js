@@ -104,6 +104,7 @@ function sheet (spreadsheet) {
       squadEmail: "A5:B20",
       squadHeader: "A4:E4",
       nextSeasonRows: "C5:C20",
+      paidRangeRows: "D5:D20",
       rsvpRange: "F5:Z20",
    // web schedule ranges
       webLink: "A100",

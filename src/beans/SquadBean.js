@@ -57,21 +57,47 @@ function squad (spreadsheet) {
   
   /**
    * ---
-   * Returns the names and emails of current squad mates.
+   * Returns the squad rows in the `Next?` / returning column
    *
-   * |squad array | value kind
-   * |---|---
-   * | `squad[i][0]` | name
-   * | `squad[i][1]` | email
+   * @memberof! squad#
+   * @return {String[]}
+   */
+  function getReturningRows () {
+    return ss.getRangeByName("nextSeasonRows").getValues().join().split(",");
+  }
+
+
+  /**
+   * ---
+   * Returns the squad rows in the `paid` column
    *
-   * @memberof! squad# 
-   * @this apiBuilder
+   * @memberof! squad#
+   * @return {String[]}
+   */
+  function paidRows () {
+    return ss.getRangeByName("paidRangeRows").getValues().join().split(",");
+  }
+
+  /**
+   * ---
+   * Returns the names and emails of current squad mates
+   * as an unfiltered and filtered list
+   *
+   * @memberof! squad#
+   * @this apiBuilder()
    * @return {Array}
+   * ```
+   * [0][x][x] unfiltered
+   * [1][x][x] filtered
+   * [x][i][0] name
+   * [x][i][1] email
+   * ```
    */
   function squadEmails () {
     this.data_range = ss.getRangeByName("squadEmail").getA1Notation();
-    
-    return this.getRangeValues();
+    var e = this.getRangeValues();
+
+    return [e, e.filter(function (x) { return (typeof x[1] != "undefined") })];
   }
 
   /**
@@ -83,8 +109,8 @@ function squad (spreadsheet) {
    */
   function getSquadRowByEmail () {
     var email_list = squadEmails.call(apiBuilder(ss, ss_id));
-    var squad_row = email_list.map(function (e) { 
-                    if (typeof e[1] == "undefined") { return "" } 
+    var squad_row = email_list[0].map(function (e) {
+                    if (typeof e[1] == "undefined") { return "" }
                     return e[1].toString();
                     }).indexOf(email) + ss.getRangeByName("squadEmail")
                                           .getRow();
@@ -117,22 +143,25 @@ function squad (spreadsheet) {
   
   /**
    * @typedef {squad} squad.PublicInterface
-   * @property {Function} getSquadRowByEmail - [squad().getSquadRow()]{@link squad#getSquadRowByEmail}
-   * @property {Function} setReturningSquadMates - [squad().setReturningSquad()]{@link squad#setReturningSquadMates}
    * @property {Function} squadEmails - [squad().emails()]{@link squad#squadEmails}
    * @property {Function} fullSquad - [squad().full()]{@link squad#fullSquad}
-   * @property {String} sheet_name - (Accessor|Mutator)
-   * @property {String} name - (Mutator)
+   * @property {Function} paidRows - [squad().gatPaidRows()]{@link squad#paidRows}
+   * @property {Function} getReturningRows - [squad().getReturningRows()]{@link squad#getReturningRows}
+   * @property {Function} getSquadRowByEmail - [squad().getSquadRow()]{@link squad#getSquadRowByEmail}
+   * @property {Function} setReturningSquadMates - [squad().setReturningSquad()]{@link squad#setReturningSquadMates}
+   * @property {String} sheet_name - (Accessor|Mutator)   * @property {String} name - (Mutator)
    * @property {String} email - (Mutator)
    * @property {Array} returning - (Mutator)
    * @property {Object} squad_row - (Mutator)
    * @property {Range} values_range - (Mutator)
    */
   return {
-    getSquadRow: getSquadRowByEmail,
-    setReturningSquad: setReturningSquadMates.bind(apiBuilder(ss, ss_id)),
     emails: squadEmails.bind(apiBuilder(ss, ss_id)),
     full: fullSquad.bind(apiBuilder(ss, ss_id)),
+    getPaidRows: paidRows,
+    getReturningRows: getReturningRows,
+    getSquadRow: getSquadRowByEmail,
+    setReturningSquad: setReturningSquadMates.bind(apiBuilder(ss, ss_id)),
     //
     get sheet_name () { return sheet_name },
     set name (val) { name = val },
