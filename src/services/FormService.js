@@ -123,27 +123,29 @@ function formService () {
   
   /**
    * ---
-   * Process the form submission by setting the response into the correct cell 
+   * Process the form submission by setting the response into the correct cell
    * using the game column and the squad mates row position.
    *
    * | eventObject.values[] | value kind
    * |---|---
-   * | `e.values[0]` | timestamp 
-   * | `e.values[1]` | rsvp 
-   * | `e.values[2]` | prefilled game Date/Time 
+   * | `e.values[0]` | timestamp
+   * | `e.values[1]` | rsvp
+   * | `e.values[2]` | prefilled game Date/Time
    * | `e.values[3]` | prefilled email
-   * 
+   *
    * @memberof! formService#
    * @this squad
    * @param {EventObject} e - event object from [onFormSubmit()]{@link onFormSubmit}
    */
   function handleFormResponse (e) {
-    var game_column = schedule(ss).gameColumn(e.values[2]);
-    var sh = ss.getSheets()[0]
-    
+    var sh = ss.getSheets()[0];
+    var col = (e.values[2] === "returning")
+                ? ss.getRangeByName("nextSeasonRows").getColumn()
+                : schedule(ss).gameColumn(e.values[2]);
+
     this.email = e.values[3];
-    sh.getRange(this.getSquadRow(), game_column).setValue(e.values[1]);
-    
+    sh.getRange(this.getSquadRow(), col).setValue(e.values[1]);
+
     SpreadsheetApp.flush();
   }
   
