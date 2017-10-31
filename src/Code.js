@@ -96,16 +96,16 @@ function onOpen (e) {
 function onDailyTrigger () {
   var ss = Config.spreadsheet();
   // Create a team form if one is not attached
-  if (ss.getFormUrl() == null) { onCreateForm() } 
-  
+  if (ss.getFormUrl() == null) { onCreateForm() }
+
   // Update the form confirmation message
   formService().updateConfirmation();
-  
+
   // Update the displayed schedule
   scheduleService().update();
 
   // Run email task
-  emailService().sendMail()
+  emailService().sendMail("today");
 }
 
 /**
@@ -242,19 +242,46 @@ function onUpdateCondFormatting () { sheetService().update.conditionalFormatting
 function onRunSchedule () {
   scheduleService().update();
 }
-  
+
+/**
+ * ---
+ * Add-on Menu option to manually send debt emails
+ */
+function onRunDebtEmail () {
+  var ss = Config.spreadsheet();
+  var isEmpty = ss.getRangeByName("squadEmail").isBlank();
+
+  if (!isEmpty) {
+     emailService().sendMail("other", "debt");
+  }
+}
+
 /**
  * ---
  * Add-on Menu option to manually send emails for the next gameday
- */ 
-function onRunEmail () {
+ */
+function onRunNextEmail () {
   var ss = Config.spreadsheet();
   var isEmpty = ss.getRangeByName("squadEmail").isBlank();
+
   if (!isEmpty && ui().confirm.sendemail() == true) {
-    emailService().sendMail(scheduleService().nextGameDay())
+     emailService().sendMail("next");
   }
 }
-  
+
+/**
+ * ---
+ * Add-on Menu option to manually send `returning next season` emails
+ */
+function onRunReturningEmail () {
+  var ss = Config.spreadsheet();
+  var isEmpty = ss.getRangeByName("squadEmail").isBlank();
+
+  if (!isEmpty) {
+     emailService().sendMail("other", "returning");
+  }
+}
+
 /**
  * ---
  * Prompts the user to enter the link for the online schedule,

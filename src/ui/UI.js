@@ -116,10 +116,12 @@ function ui () {
   
   /**
    * ---
-   * Create a custom menu with the options: 
+   * Create a custom menu with the options:
    * - [Start a new season]{@link onNewSeason}
    * - [Run Schedule Update]{@link onRunSchedule}
-   * - [Run Send Email Task]{@link onRunEmail}
+   * - [Send Payment Due Emails]{@link onRunDebtEmail}
+   * - [Send Returning? Emails]{@link onRunReturningEmail}
+   * - [Send Next Gameday Emails]{@link onRunNextEmail}
    * - [Extra Options Help]{@link onOptionsHelp}
    * - [Re-install Team Form]{@link onResetForm}
    * - [Re-install Triggers]{@link onUpdateTriggers}
@@ -136,13 +138,15 @@ function ui () {
    */
   function addonMenu (e) {
     var menu = ui.createAddonMenu();
-     
+
     if (e && e.authMode != ScriptApp.AuthMode.NONE) {
       menu.addItem("Start New Season", "onNewSeason")
           .addSeparator()
           .addSubMenu(ui.createMenu("Advanced Options")
                         .addItem("Run Schedule Update", "onRunSchedule")
-                        .addItem("Run Send Email Task", "onRunEmail")
+                        .addItem("Send Payment Due Emails", "onRunDebtEmail")
+                        .addItem("Send Returning? Emails", "onRunReturningEmail")
+                        .addItem("Send Next Gameday Emails", "onRunNextEmail")
                         .addSeparator()
                         .addSubMenu(ui.createMenu("Extra Options")
                         .addItem("** Extra Options Help **", "onOptionsHelp")

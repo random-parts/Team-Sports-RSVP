@@ -121,8 +121,8 @@ function scheduleService () {
       this.opponent();
 
       // Only set the date when status is a time or the date cell is empty
-      if (RegExp(/^[0-9]+/).test(s[i][4]) == true) { 
-        this.date = utils(ss).date.makeDateTime(s[i][0], s[i][4]);
+      if (RegExp(/^[0-9]+/).test(s[i][4]) == true) {
+        this.date = utils(ss,tz).date.makeDateTime(s[i][0], s[i][4]);
       } else if (!this.date) {
         try { this.date = s[i][0].replace(/-/, " ") } 
          catch (e) {}
