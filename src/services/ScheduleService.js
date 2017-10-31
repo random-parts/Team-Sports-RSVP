@@ -148,13 +148,55 @@ function scheduleService () {
 
   /**
    * ---
-   * Finds the next/upcoming gameday and places all games 
-   * scheduled for that day into an array by the games column position
+   * Gets all of the seasons scheduled bye-weeks based on
+   * the most common gameday day-of-the-week that games are scheduled on.
    *
-   * | return array | value kind
-   * |---|---
-   * | `gameday_games[0][i]` | Array of gameday games column positions
-   * | `gameday_games[1][i]` | Array of Date Object for gameday games
+   * @param {Array=} dates - compsite schedule dates (default: composite dates)
+   * @param {Boolen=} filter_future - filter old dates out (default: false)
+   * @return {Array}
+   * ```
+   * [i][0] date as day of year
+   * [i][1] date as date object (day,month,year)
+   * ```
+   */
+  function getByeWeekDates (dates, filter_future) {
+    var dates = dates || schedule(ss).compositeDates();
+    var filter_future = filter_future || false;
+    var gamedays_of_week = utils(ss,tz).date.format("weekday", dates);
+    var common_day = utils(ss,tz).getMostCommon(gamedays_of_week);
+      if (!common_day[2]) { return null }
+    var gamedays_of_year = utils(ss,tz).date.format("yearday", dates);
+    var diff, byeweek_list = [], curr_date = new Date();
+
+    for (var i = 0; i < dates.length; i++) {
+       // When more than 7 days between games add the byeweek date to list
+      if (gamedays_of_year[i + 1]
+           && (gamedays_of_year[i + 1] - gamedays_of_year[i] > 7)) {
+
+        diff = (gamedays_of_week[i] - common_day[0][0]) || 0;
+        curr_date = new Date(dates[i]);
+
+        do {
+          curr_date.setDate(curr_date.getDate() + (7 - diff));
+          var bye_weekday = utils(ss,tz).date.format("weekday", curr_date)[0];
+          var bye_yearday = utils(ss,tz).date.format("yearday", curr_date)[0];
+          diff = (bye_weekday - common_day[0][0]) || 0;
+
+          // Check that the bye-week game is not scheduled & add it to the list
+          (gamedays_of_year.indexOf(bye_yearday) == -1)
+            ? byeweek_list.push([bye_yearday, new Date(curr_date)]) : null;
+
+          // Do while there are consecutive bye-weeks
+        } while ((bye_yearday + 7) < gamedays_of_year[i + 1]);
+      }
+    }
+
+    if (filter_future) {
+      var today = utils(ss,tz).date.format("yearday")[0];
+      return byeweek_list.filter(function (e) { return e[0] >= today });
+
+    } else { return byeweek_list; }
+  }
    *
    * 
    * @memberof! scheduleService#
