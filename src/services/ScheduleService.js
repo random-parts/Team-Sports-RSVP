@@ -142,7 +142,7 @@ function scheduleService () {
     }
     
     // Set the column highlight on the next gameday game columns
-    this.column = getNextGameDayCols()[0];
+    this.column = getNextGameDayCols()[0][0][0];
     this.highlightGame();
   }
 
@@ -235,7 +235,7 @@ function scheduleService () {
     var rsvp_range = ss.getRangeByName("rsvpRange");
     var today = new Date();
     var isClear = false;
-    var next_gameday_col = Number(getNextGameDayCols()[0][0]);
+    var next_gameday_col = getNextGameDayCols()[0][0][0];
     var request_data = [];
 
     game_rsvps.forEach(function (e, i) {
