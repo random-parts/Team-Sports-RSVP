@@ -197,37 +197,76 @@ function scheduleService () {
 
     } else { return byeweek_list; }
   }
+
+  /**
+   * ---
+   * Finds the next active game from date
+   * and returns composite game infomation.
    *
-   * 
    * @memberof! scheduleService#
-   * @return {Array} column position and datetime of the next gameday games
+   * @param {Date=} date - date to use for finding games (default: today)
+   * @return {Array}
+   * ```
+   * [i][0] Game {n}\n Field
+   * [i][1] Date [ 'dddd\n" "mmm" "dd' ]
+   * [i][2] [ time | score | "Cancelled" ]
+   * [i][3] opponent [ **bold** => Home team ]
+   * ```
    */
-  function getNextGameDayCols () {
-    var c_dates = schedule().compositeDates();
-    var today = utils(ss).date.format("yearday");
-    var game_dates = [];
-    var game_columns = [];
-    
+  function getNextActiveGame (date) {
+    var date = date || new Date();
+    var next_gameday = scheduleService().nextGameDay(99, date);
+      if (typeof next_gameday[0] == "undefined") { return }
+    var n_cols = next_gameday.reduce(function (r, e) { return r.concat(e[0]) }, []);
+    var game_info = schedule(ss).composite.apply(null, n_cols);
+    var i = 0;
+    // Find the next game that is not `Cancelled`
+    while (typeof game_info[i] != "undefined" && game_info[i][0] == "Cancelled") { i++ }
+
+    return game_info[i];
+  }
+
+  /**
+   * ---
+   * Finds the next/upcoming gameday and places all games
+   * scheduled for that day into an array by the games column position
+   *
+   * @memberof! scheduleService#
+   * @param {Number=} days - number of additional gamedays to return (Default: 0)
+   * @param {Date=} date - date to use for finding games (Default: today)
+   * @return {Array}
+   * ```
+   * [i][0][i] column positions
+   * [i][1][i] date Object
+   * ```
+   */
+  function getNextGameDayCols (days, date) {
+    var days = days || 0;
+    var date = date || new Date();
+    var c_dates = schedule(ss).compositeDates();
+    var today = utils(ss,tz).date.format("yearday", date)[0];
+    var yearday = utils(ss,tz).date.format("yearday", c_dates);
+    var game_columns = [], game_dates = [], game_day = [];
+
     // Compares current column with next column for multiple games in one day
-    for (var i = 0; i < c_dates.length; i++) {
-      var current_date = utils(ss).date.format("yearday", new Date(c_dates[i]));
+    for (var i = 0; i < yearday.length; i++) {
+      var current_date = yearday[i];
+      var n_date = (typeof yearday[i + 1] != "undefined")
+                     ? yearday[i + 1] : false;
 
-      if (typeof c_dates[i + 1] != "undefined") {
-        var next_date = utils(ss).date.format("yearday", new Date(c_dates[i + 1]));
-
-      } else { 
-        var next_date = false; 
-      }
-  
       if (current_date >= today && c_dates[i] != "") {
         game_dates.push(c_dates[i]);
         game_columns.push(schedule(ss).gameColumn(c_dates[i]));
-        // Exit if the next gameday was found and there are no more games on that day
-        if (current_date != next_date) { break }
+        // Exit if the next day was found and there are no more days needed
+        if (current_date != n_date) {
+          game_day.push([game_columns, game_dates]);
+          game_columns = [], game_dates = [];
+          if (days-- <= 0) { break }
+        }
       }
     }
-    
-    return [game_columns, game_dates];
+
+    return game_day;
   }
   
   /**
@@ -326,13 +365,17 @@ function scheduleService () {
   
   /**
    * @typedef {scheduleService} scheduleService.PublicInterface
+   * @property {Function} getByeWeekDates - [scheduleService().getByeWeeks()]{@link scheduleService#getByeWeekDates}
    * @property {Function} isScheduleRangeBlank - [scheduleService().isScheduleBlank()]{@link scheduleService#isScheduleRangeBlank}
+   * @property {Function} getNextActiveGame - [scheduleService().nextActiveGame()]{@link scheduleService#getNextActiveGame}
    * @property {Function} getNextGameDayCols - [scheduleService().nextGameDay()]{@link scheduleService#getNextGameDayCols}
    * @property {Function} addWebScheduleLink - [scheduleService().setWebLink()]{@link scheduleService#addWebScheduleLink}
    * @property {Function} updateSchedule - [scheduleService().update()]{@link scheduleService#updateSchedule}
    */
   return {
+    getByeWeeks: getByeWeekDates,
     isScheduleBlank: isScheduleRangeBlank,
+    nextActiveGame: getNextActiveGame,
     nextGameDay: getNextGameDayCols,
     setWebLink: addWebScheduleLink,
     update: updateSchedule.bind(game(ss)),
