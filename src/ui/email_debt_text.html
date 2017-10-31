@@ -1,0 +1,13 @@
+<?!= first_name ?>,
+
+<? if (next_date) { ?>
+Please pay your <?!= team_name ?> team fees before <?= next_number ?> on:
+
+<?= next_date ?> @ <?= next_time ?>
+<? } else { ?>
+Please pay your team fees for <?!= team_name ?>
+<? } ?>
+
+
+Link to Google Sheets:
+<?= sheets_url ?>
