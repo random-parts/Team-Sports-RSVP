@@ -110,6 +110,14 @@ function onDailyTrigger () {
 
   // Run email task
   emailService().sendMail("today");
+
+  SpreadsheetApp.flush();
+
+  // Send daily email log
+  emailService().sendMail("log");
+
+  // Clear the email log
+  storage().clear("email");
 }
 
 /**
