@@ -28,7 +28,7 @@
 /**
  * @file Contains the controller methods used to orchestrate script actions
  * @license Apache License, Version 2.0
- * @version 1.2.16
+ * @version 1.3.17
  */
 
 /**
@@ -45,7 +45,7 @@
  * @property {Form} team_form - `debug:` openByUrl() <br> `!debug:` getActiveForm()
  */  
 var Config = {
-  version: "1.2.16",
+  version: "1.3.17",
   debug: false,
   debug_ss_id: "SHEET_ID",
   spreadsheet: function () {
