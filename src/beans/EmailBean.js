@@ -63,7 +63,7 @@ function email () {
 
     // Log email if the send mail_quota was not at zero
     if (mail_quota != 0 && email_type != "Log") {
-      var email_log = {
+      return {
         team_name: team_name,
         email_type: email_type,
         subject: subject,
@@ -72,8 +72,6 @@ function email () {
         timestamp: new Date()
       }
     }
-
-    return email_log;
   }
 
   /**
