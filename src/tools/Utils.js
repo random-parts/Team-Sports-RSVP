@@ -230,7 +230,31 @@ function utils (spreadsheet, tz) {
              .inTimezone(tz)
              .create();
   }
-  
+
+  /**
+   * ---
+   * Checks for major or minor updates that may require
+   * script property/setting updates. Runs the update
+   * and sets the new version in storage.
+   *
+   * @memberof! utils#
+   */
+  function checkUpdateVersion () {
+    var current_ver = parseFloat(storage().get("version")) || "0.0";
+
+    // Check for major or minor version changes
+    if (current_ver < parseFloat(Config.version)) {
+      try {
+        // Run updates
+        _updateScript();
+
+        SpreadsheetApp.flush();
+        // Set the new version in storage
+        storage().set("version", Config.version);
+      } catch (e) {}
+    }
+  }
+
   /**
    * --- 
    * Delete the spreadsheets installed triggers.
@@ -244,7 +268,18 @@ function utils (spreadsheet, tz) {
        installed.forEach(function (e) { ScriptApp.deleteTrigger(e) });
      }
   }
-   
+
+  /**
+   * ---
+   * Updates the script when major or minor script changes require it
+   *
+   * @memberof! utils#
+   */
+  function _updateScript () {
+    // Updates for 1.3 - update NamedRanges
+    sheetService().update.namedRanges();
+  }
+
   /**
    * ---
    * Invokes a function, performing up to 5 retries with exponential backoff.
@@ -292,6 +327,7 @@ function utils (spreadsheet, tz) {
    * @property {Function} clearTriggers - [utils().script.clean.triggers()]{@link utils#clearTriggers}
    * @property {Function} addTriggers - [utils().script.install.triggers()]{@link utils#addTriggers}
    * @property {Function} gasRetry - [utils().script.retry()]{@link utils#gasRetry}
+   * @property {Function} checkUpdateVersion - [utils().script.update()]{@link utils#checkUpdateVersion}
    */
   return {
     getMostCommon: getMostCommon,
@@ -309,7 +345,8 @@ function utils (spreadsheet, tz) {
       install: {
         triggers: addTriggers
       },
-      retry: gasRetry
+      retry: gasRetry,
+      update: checkUpdateVersion
     }
   }
 }

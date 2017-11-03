@@ -45,6 +45,7 @@
  * @property {Form} team_form - `debug:` openByUrl() <br> `!debug:` getActiveForm()
  */  
 var Config = {
+  version: "1.2.16",
   debug: false,
   debug_ss_id: "SHEET_ID",
   spreadsheet: function () {
@@ -84,7 +85,11 @@ function onInstall (e) {
  * @param {EventObject} e
  */ 
 function onOpen (e) {
-  var ss = Config.spreadsheet(); 
+  var ss = Config.spreadsheet();
+
+  // Check that the script is up-to-date
+  utils(ss).script.update();
+
   // Build the Add-On Menu
   ui().menu(e);
   SpreadsheetApp.flush();
@@ -99,6 +104,10 @@ function onOpen (e) {
  */   
 function onDailyTrigger () {
   var ss = Config.spreadsheet();
+
+  // Check that the script is up-to-date
+  utils(ss).script.update();
+
   // Create a team form if one is not attached
   if (ss.getFormUrl() == null) { onCreateForm() }
 
@@ -161,6 +170,9 @@ function onSheetEdit (e) {
  */
 function onNewSeason () {
   var ss = Config.spreadsheet();
+  // Check that the script is up-to-date
+  utils(ss).script.update();
+
   var sheet_name = ui().prompt.sheetname;
   var ss_triggers = ScriptApp.getUserTriggers(ss);
   var active_sheet;

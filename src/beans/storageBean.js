@@ -31,7 +31,8 @@ function storage (prop) {
   var storage = prop || Config.storage();
   var key;
   var property = {
-      email: "LOG_EMAIL"
+    email: "LOG_EMAIL",
+    version: "SCRIPT_VERSION"
   }
 
   /**
@@ -58,6 +59,18 @@ function storage (prop) {
 
   /**
    * ---
+   * Gets and parses simple storage values;
+   *
+   * @memberof! storage#
+   * @param {Object[]} key - property key to retrieve
+   * @returns {?}
+   */
+  function getSimple (key) {
+    return JSON.parse(storage.getProperty(property[key]));
+  }
+
+  /**
+   * ---
    * Sets Log storage values; concats objects if its not empty
    *
    * @memberof! storage#
@@ -75,14 +88,29 @@ function storage (prop) {
     }
   }
 
+  /**
+   * ---
+   * Sets simple storage values;
+   *
+   * @memberof! storage#
+   * @param {Object[]} key - property key to use
+   * @param {?} value - property value
+   */
+  function setSimple (key, value) {
+    storage.setProperty(property[key], JSON.stringify(value));
+  }
+
  /**
    * @typedef {storage} storage.PublicInterface
    * @property {Funtion} clearStorageProperty - [storage().clear()]{@link storage#clearStorageProperty}
-   * @property {Funtion} getLog - [storage().get()]{@link storage#getLog}
-   * @property {Funtion} setLog - [storage().set()]{@link storage#setLog}
-   */
-  return {
+   * @property {Funtion} getSimple - [storage().get()]{@link storage#getSimple}
+   * @property {Funtion} setSimple - [storage().set()]{@link storage#setSimple}
+   * @property {Funtion} getLog - [storage().log.get()]{@link storage#getLog}
+   * @property {Funtion} setLog - [storage().log.set()]{@link storage#setLog}
+   */  return {
     clear: clearStorageProperty,
+    get: getSimple,
+    set: setSimple,
     log: {
       get: getLog,
       set: setLog
