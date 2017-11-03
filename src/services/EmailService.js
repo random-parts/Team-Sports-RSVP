@@ -32,9 +32,10 @@ function emailService () {
   var team_name = team(ss).name;
   var tz = ss.getSpreadsheetTimeZone();
   var sets = {
-    today: curateTodaysEmails,
+    log: curateLogEmails,
+    next: curateNextGameEmails,
     other: curateManualEmails,
-    next: curateNextGameEmails
+    today: curateTodaysEmails,
   }
 
   /**
@@ -51,6 +52,7 @@ function emailService () {
     var email_sets = sets[set_type] ? sets[set_type].call(email(),arg) : null;
       if (!email_sets) { return }
     var ss_url = ss.getUrl();
+    var sent_log = [];
 
     for (var email_type in email_sets) {
       // Only process emails when there is a valid email list
@@ -60,6 +62,7 @@ function emailService () {
          * @this email()
          */
         email_sets[email_type].email.forEach(function (e) {
+          this.log = e.log;
           this.time_zone = tz;
           this.team_name = e.team_name;
           this.email_type = email_type;
@@ -90,9 +93,43 @@ function emailService () {
               this.email = e.to_send[i][1];
             }
             // Use exponential backoff to account for untimely server issues
-            utils(ss).script.retry(this.send);
+            var log = utils(ss,tz).script.retry(this.send);
+
+            // Collect the email log
+            if (typeof log != 'undefined') { sent_log.push(log) }
           }
         }, email());
+      }
+    }
+    // Set the collection of email logs
+    storage().log.set("email", sent_log);
+  }
+
+  /**
+   * ---
+   * Gathers the sent log email
+   *
+   * @memberof! emailService#
+   * @this email()
+   * @return {
+   *   Log: {
+   *     email:Array.<{length}>
+   *   }
+   * }
+   */
+  function curateLogEmails () {
+    var email_logs = storage().log.get("email");
+    var e_log = [];
+
+    this.email = [["Email-Log Task", ss.getOwner().getEmail()]];
+    this.team_name = team_name;
+    this.log = email_logs;
+
+    e_log.push(this.logEmail());
+
+    return {
+      Log: {
+        email: e_log
       }
     }
   }

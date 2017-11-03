@@ -96,12 +96,18 @@ function utils (spreadsheet, tz) {
         ? (arguments[1].length ? arguments[1] : [arguments[1]]) : [new Date()])
       : [new Date()];
     var df = {
+      logs: "dd-MMM-yy 'at' h:mm:s a",
       split: ["EEEE, MMMM dd","h:mm a"],
       yearday: "D"
     };
 
     var format = a.map(function (e) {
       switch (true) {
+        // Log email timestamp
+        case this == "logs":
+          return Utilities.formatDate(new Date(e), tz, df.logs);
+          break;
+
         // Format and splits into [date, time]
         case this == "split":
           return [Utilities.formatDate(new Date(e), tz, df.split[0]),

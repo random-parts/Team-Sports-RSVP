@@ -45,11 +45,15 @@
  * @property {Form} team_form - `debug:` openByUrl() <br> `!debug:` getActiveForm()
  */  
 var Config = {
-  debug: false, 
-  debug_ss_id: "SHEET_ID", 
-  spreadsheet: function () { 
+  debug: false,
+  debug_ss_id: "SHEET_ID",
+  spreadsheet: function () {
     if (this.debug) { return SpreadsheetApp.openById(this.debug_ss_id) }
      else { return SpreadsheetApp.getActiveSpreadsheet() }
+  },
+  storage: function () {
+    if (this.debug) { return PropertiesService.getScriptProperties() }
+     else { return PropertiesService.getDocumentProperties() }
   },
   team_form: function () {
       var form_url = this.spreadsheet().getFormUrl();

@@ -28,30 +28,16 @@
  * @property {email.PublicInterface} - available public methods
  */
 function email () {
-  var email, email_type, first_name, game_field, game_date, game_opp, game_time,
+  var email, email_type, first_name, game_field, game_date, game_opp, game_time, log,
       next_date, next_field, next_number, next_opp, next_time, sheets_url, subject,
       team_name,templates, time_zone, yes_link, probably_link, doubtful_link, no_link;
   var type = {
-        Byeweek: {
-          html: "email_byeweek",
-          plain_text: "email_byeweek_text"
-        },
-        Cancelled: {
-          html: "email_cancelled",
-          plain_text: "email_cancelled_text"
-        },
-        Rsvp: {
-          html: "email_rsvp",
-          plain_text: "email_rsvp_text"
-        },
-        Debt: {
-          html: "email_debt",
-          plain_text: "email_debt_text"
-        },
-        Returning: {
-          html: "email_returning",
-          plain_text: "email_returning_text"
-        }
+        Byeweek: { html: "email_byeweek", plain_text: "email_byeweek_text", color: "gray" },
+        Cancelled: { html: "email_cancelled", plain_text: "email_cancelled_text" , color: "hotpink" },
+        Debt: { html: "email_debt", plain_text: "email_debt_text" , color: "firebrick" },
+        Log: { html: "email_log", plain_text: "email_log_text" , color: "black" },
+        Returning: { html: "email_returning", plain_text: "email_returning_text" , color: "purple" },
+        Rsvp: { html: "email_rsvp", plain_text: "email_rsvp_text" , color: "darkblue" }
       }
 
   /**
@@ -59,8 +45,10 @@ function email () {
    * Sends the actual email out.
    *
    * @memberof! email#
+   * returns {Object}
    */
   function sendEmail () {
+    var mail_quota = MailApp.getRemainingDailyQuota();
     var html_body = HtmlService.createTemplateFromFile(type[email_type].html)
                                .evaluate().getContent();
     var text_body = HtmlService.createTemplateFromFile(type[email_type].plain_text)
@@ -72,6 +60,20 @@ function email () {
       body: text_body,
       htmlBody: html_body
     });
+
+    // Log email if the send mail_quota was not at zero
+    if (mail_quota != 0 && email_type != "Log") {
+      var email_log = {
+        team_name: team_name,
+        email_type: email_type,
+        subject: subject,
+        first_name: first_name,
+        email_address: email,
+        timestamp: new Date()
+      }
+    }
+
+    return email_log;
   }
 
   /**
@@ -138,6 +140,24 @@ function email () {
 
   /**
    * ---
+   * Gathers the Logs Email data
+   *
+   * @return {Object} obj
+   *           {String} obj.subject
+   *           {String} obj.log
+   *           {String[][]} obj.to_send
+   */
+  function getLogEmail () {
+    var obj = {};
+    obj.subject = team_name + " :: Sent Email Logs";
+    obj.log = log;
+    obj.to_send = email;
+
+    return obj;
+  }
+
+  /**
+   * ---
    * Gathers the returning next season Email data
    *
    * @return {Object} obj
@@ -186,6 +206,7 @@ function email () {
    * @property {Funtion} getByeweekEmail - [email().byeweekEmail()]{@link email#getByeweekEmail}
    * @property {Funtion} getCancelledEmail - [email().cancelledEmail()]{@link email#getCancelledEmail}
    * @property {Funtion} getDebtEmail - [email().debtEmail()]{@link email#getDebtEmail}
+   * @property {Funtion} getLogEmail - [email().logEmail()]{@link email#getLogEmail}
    * @property {Funtion} getReturningEmail - [email().returningEmail()]{@link email#getReturningEmail}
    * @property {Funtion} getRsvpEmail - [email().rsvpEmail()]{@link email#getRsvpEmail}
    * @property {Object} type - (Accessor)
@@ -195,6 +216,7 @@ function email () {
    * @property {Date} game_date - (Mutator)
    * @property {String} game_opp - (Mutator)
    * @property {Date} game_time - (Mutator)
+   * @property {Object} log - (Mutator)
    * @property {String} next_date - (Mutator)
    * @property {String} next_field - (Mutator)
    * @property {String} next_number - (Mutator)
@@ -214,6 +236,7 @@ function email () {
     byeweekEmail: getByeweekEmail,
     cancelledEmail: getCancelledEmail,
     debtEmail: getDebtEmail,
+    logEmail: getLogEmail,
     returningEmail: getReturningEmail,
     rsvpEmail: getRsvpEmail,
     //
@@ -225,6 +248,7 @@ function email () {
     set game_date (val) { game_date = val },
     set game_opp (val) { game_opp = val },
     set game_time (val) { game_time = val },
+    set log (val) { log = val },
     set next_date (val) { next_date = val.replace("\n", "") },
     set next_field (val) { next_field = val },
     set next_number (val) { next_number = val },

@@ -1,0 +1,19 @@
+Sent Email Logs - for all emails sent in the last 24hours. (log email excluded)
+
+<? if (log.length) { ?>
+  <?= log[0].team_name ?>
+
+<? log.forEach( function (e) { ?>
+  <? var ts = utils().date.format("logs", new Date(e.timestamp)); ?>
+
+<?!= e.email_type ?> | <?!= e.subject ?>
+
+<?!= e.first_name ?> | <?!= e.email_address ?> | <?!= ts ?>
+
+--------------------------------------------------
+
+  <? }) ?>
+<? } else { ?>
+
+No emails have been sent since the last log check
+<? } ?>

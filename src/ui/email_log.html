@@ -1,0 +1,68 @@
+<!-- ***************************************************************************
+*   @license                                                                   *
+*   Copyright 2017 random-parts. All Rights Reserved.                          *
+*                                                                              *
+*   Licensed under the Apache License, Version 2.0 (the "License");            *
+*   you may not use this file except in compliance with the License.           *
+*   You may obtain a copy of the License at                                    *
+*                                                                              *
+*       http://www.apache.org/licenses/LICENSE-2.0                             *
+*                                                                              *
+*   Unless required by applicable law or agreed to in writing, software        *
+*   distributed under the License is distributed on an "AS IS" BASIS,          *
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+*   See the License for the specific language governing permissions and        *
+*   limitations under the License.                                             *
+**************************************************************************** -->
+
+<html>
+  <head>
+  </head>
+  <body>
+<table align="center" width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td>
+      <table align="center" border="0" cellspacing="0" cellpadding="0">
+        <? if (log.length) { ?>
+        <tr width="100%">
+          <td colspan="4"><p><?= log[0].team_name ?> sent email log:</p></td>
+        </tr>
+        <tr width="100%">
+          <td width="5%"><h4>Email Type</h4></td>
+          <td width="5%"><h4>Name</h4></td>
+          <td width="10%"><h4>Email Address</h4></td>
+          <td width="25%"><h4>Subject</h4></td>
+          <td width="15%"><h4>Timestamp</h4></td>
+        </tr>
+          <? log.forEach( function (e) { ?>
+          <? var ts = utils().date.format("logs", new Date(e.timestamp)); ?>
+        <tr width="100%">
+          <td width="5%"><font color='<?= type[e.email_type]["color"] ?>'><?= e.email_type ?></font></td>
+          <td width="5%"><b><?= e.first_name ?></b></td>
+          <td width="10%"><?= e.email_address ?></td>
+          <td width="25%"><font color='<?= type[e.email_type]["color"] ?>'><?= e.subject ?></font></td>
+          <td width="15%"><?= ts ?></td>
+        </tr>
+        <? }) ?>
+        <? } else { ?>
+        <tr>
+          <td align="center" width="100%"><p>No emails have been sent since the last log check</p></td>
+        </tr>
+        <? } ?>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><br/></td>
+  </tr>
+</table>
+<table align="center" width="100%" border="0" cellspacing="10px" cellpadding="0">
+  <tr>
+    <td>Link to Google Sheets:</td>
+  </tr>
+  <tr>
+    <td><?= sheets_url ?></td>
+  </tr>
+</table>
+  </body>
+</html>
