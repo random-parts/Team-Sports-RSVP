@@ -36,6 +36,26 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
+v 1.3.17
+
+- Overhaul of Email Service task:
+    - Processes Bye-Week emails when the schedule has a common (2/3rd majority) game-day.
+    - New email type to ask current roster if they are returning `Next` season.
+    - New email type to send payment reminders for current roster slots that have not been marked as `Paid`.
+    - Updated `Add-on` menu to manually send `Payment` and `Returning?` emails.
+    - New and updated `email_html` templates; emails will show the next `active` game and field if applicable.
+    - onDailyTrigger() will now send the Sheet Owner a `sent email log` showing what emails were sent from that Spreadsheet in the past 24hrs.
+
+- New `storageBean` to handle `DocumentProperties` consistently.
+- Added `utils().date.format()` to handle date formatting consistently.
+- There is now a script updater that will check for major and minor version updates and run an `update()` to set or change any new properties/settings as needed.
+
+
+Fixes
+
+- New season roster copy will now remove stale values in the Next and Paid columns
+
+
 v1.2.15
 
 Fixes
