@@ -42,6 +42,9 @@ function template (spreadsheet) {
    */
   function createTemplate () {
     ss.insertSheet(template_name, index);
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
   /**
@@ -53,8 +56,11 @@ function template (spreadsheet) {
    */
   function deleteNamedRanges () {
     this.named_ranges = template_sheet.getNamedRanges();
-    
+
     this.removeNamedRanges()
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
   /**
@@ -109,6 +115,9 @@ function template (spreadsheet) {
       template_sheet.setColumnWidth(format_next.getColumn(), 75);
  
       template_sheet.setFrozenColumns(1);
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
 
   /**
@@ -123,6 +132,9 @@ function template (spreadsheet) {
     this.sh = template_sheet
 
     this.updateNamedRanges()
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
   /**
@@ -135,8 +147,11 @@ function template (spreadsheet) {
   function setTemplateContent () {
     const headers = [["Name", "Email", "Next?", "Paid", "Phone"]];
     var squad_headers = ss.getRangeByName(prefix + "squadHeader");
- 
-    squad_headers.setValues(headers); 
+
+    squad_headers.setValues(headers);
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
 
   /**

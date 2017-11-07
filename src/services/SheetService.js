@@ -67,8 +67,12 @@ function sheetService () {
          var formatting = response.updatedSpreadsheet.sheets[i].conditionalFormats;
 
       } while (typeof formatting != "undefined");
-    } 
-    catch (e) {};
+    }
+    catch (e) {}
+    finally {
+      // Apply pending Spreadsheet changes
+      SpreadsheetApp.flush();
+    }
   }
   
   /**
@@ -93,6 +97,9 @@ function sheetService () {
     template_range.copyTo(sheet_range);
     // Clear the weblink cell - which will also clear the web data
     ss.getRangeByName("webLink").clearContent();
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
 /*********************************************************************************
@@ -104,7 +111,7 @@ function sheetService () {
    * Creates a new formatted season sheet based on the template sheet.
    *
    * @memberof! sheetService#
-   * @this sheet
+   * @this sheet()
    * @param {String} arguments[0] type "season"
    * @param {String} arguments[1] sheetname
    */
@@ -130,6 +137,7 @@ function sheetService () {
 
     setSheetConditionalFormatting.call(sheet(ss), this.sh);
 
+    // Apply pending Spreadsheet changes
     SpreadsheetApp.flush();
   }
   
@@ -138,7 +146,7 @@ function sheetService () {
    * Creates a template sheet for the creation of new season sheets
    *
    * @memberof! sheetService#
-   * @this sheet
+   * @this sheet()
    * @param {String} arguments[0] "template"
    */
   function templateSheet () {
@@ -162,7 +170,8 @@ function sheetService () {
     
     // Make sheet tabs list prettier
     this.getTemplate().hideSheet();
-    
+
+    // Apply pending Spreadsheet changes
     SpreadsheetApp.flush();
   }
 
@@ -175,7 +184,7 @@ function sheetService () {
    * Removes a sheet by name from the spreadsheet.
    *
    * @memberof! sheetService#
-   * @this sheet
+   * @this sheet()
    * @param {String} name - name of sheet to remove
    */
   function removeSheet (name) {
@@ -193,7 +202,7 @@ function sheetService () {
    * to the sheet from squad mates without forcing them to first login.
    *
    * @memberof! sheetService#
-   * @this sheet
+   * @this sheet()
    */
   function setSheetProtections () {
     this.sheet_protection = ss.getSheets()[0].protect();
@@ -209,7 +218,7 @@ function sheetService () {
    * Create data validation rules for ranges in the sheet. 
    *
    * @memberof! sheetService#
-   * @this sheet
+   * @this sheet()
    */
   function setSheetValidation () {
     this.validation_ranges = [ss.getRangeByName("rsvpRange"), ss.getRangeByName("nextSeasonRows")]
@@ -242,6 +251,9 @@ function sheetService () {
     };
 
     Sheets.Spreadsheets.batchUpdate(JSON.stringify(request_body), ss_id);
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
 
   /**
@@ -271,6 +283,9 @@ function sheetService () {
    */
   function _isUniqueSheetName (name) {
     var sheet_names = ss.getSheets().map(function(e){return e.getName()});
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
 
     return (sheet_names.indexOf(name) == -1)
   }

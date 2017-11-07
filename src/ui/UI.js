@@ -49,6 +49,9 @@ function ui () {
    * @memberof! ui#
    */
   function informSetupComplete () {
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+
     ui.alert("Set-up complete!");
   } 
   
@@ -163,6 +166,9 @@ function ui () {
                         .addItem("Restore Data Validation", "onUpdateDataValidation")
                         .addItem("Restore Named Ranges", "onUpdateNamedRange")))
           .addToUi();
+
+      // Apply pending Spreadsheet changes
+      SpreadsheetApp.flush();
      }
   }
   

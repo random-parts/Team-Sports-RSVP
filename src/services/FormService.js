@@ -54,6 +54,9 @@ function formService () {
     ss.setActiveSheet(formsheet);
     ss.moveActiveSheet(ss.getSheets().length);
     formsheet.hideSheet();
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
   /**
@@ -146,6 +149,7 @@ function formService () {
     this.email = e.values[3];
     sh.getRange(this.getSquadRow(), col).setValue(e.values[1]);
 
+    // Apply pending Spreadsheet changes
     SpreadsheetApp.flush();
   }
   

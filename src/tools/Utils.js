@@ -284,6 +284,9 @@ function utils (spreadsheet, tz) {
   function _updateScript () {
     // Updates for 1.3 - update NamedRanges
     sheetService().update.namedRanges();
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
 
   /**

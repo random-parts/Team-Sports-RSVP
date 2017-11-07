@@ -43,6 +43,9 @@ function sheet (spreadsheet) {
    */
   function createSheet () {
     ss.insertSheet(name, index, options);
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
 
   /**
@@ -53,8 +56,11 @@ function sheet (spreadsheet) {
    */
   function dataValidation () {
     validation_ranges.forEach(function (e) { e.setDataValidation(rule) });
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
-  
+
   /**
    * ---
    * Removes a set of named ranged if defined, else clears all of them.
@@ -68,8 +74,11 @@ function sheet (spreadsheet) {
        var named_ranges = ss.getNamedRanges();
        named_ranges.forEach(function (e) { e.remove() });
     }
-  }  
-  
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+  }
+
   /**
    * ---
    * Removes a sheet fromt the spreadsheet by name.
@@ -78,9 +87,14 @@ function sheet (spreadsheet) {
    */
   function deleteSheet () {
     var rm_sheet = ss.getSheetByName(name);
-    if (rm_sheet != null) { ss.deleteSheet(rm_sheet) }
+    if (rm_sheet != null) {
+      ss.deleteSheet(rm_sheet);
+
+      // Apply pending Spreadsheet changes
+      SpreadsheetApp.flush();
+    }
   }
-  
+
   /**
    * ---
    * Sets the named ranges on a sheet.
@@ -115,6 +129,9 @@ function sheet (spreadsheet) {
     for (var key in namedranges) {
       ss.setNamedRange(prefix + key, sh.getRange(namedranges[key]));
     }
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
 
   /**
@@ -128,6 +145,9 @@ function sheet (spreadsheet) {
     sheet_protection.setDescription("Team Sheet Protection");
     sheet_protection.addEditor(editor);
     sheet_protection.removeEditors(editor_list);
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
  
   /**
@@ -145,7 +165,10 @@ function sheet (spreadsheet) {
     var data_range = ss.getRangeByName("webData");
     data_range.setFormula(
       '=IMPORTHTML(' + link_range.getA1Notation() + ', "table", ' + table_num + ')'
-    ); 
+    );
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
 /******************************************************************************
@@ -164,23 +187,25 @@ function sheet (spreadsheet) {
   function getRSVPConditionalFormatting () {
     var sheet_id = sh.getSheetId();
     var rsvp_range = ss.getRangeByName("rsvpRange") || ss.getRangeByName("_t_rsvpRange");
+    var rsvp_row = rsvp_range.getRow();
+    var rsvp_lastrow = rsvp_range.getLastRow();
+    var rsvp_col = rsvp_range.getColumn();
     var date_range =  ss.getRangeByName("dateColumns") || ss.getRangeByName("_t_dateColumns");
+    var date_row = date_range.getRow();
     var requests_list = [];
-
-    SpreadsheetApp.flush();
 
     // Add each columns' update request into an array for batch processing
     for (var i = 0; i < rsvp_range.getNumColumns(); i++) {
-      var is_pastdate_cell = sh.getRange(date_range.getRow(), (i + rsvp_range.getColumn()));
+      var is_pastdate_cell = sh.getRange(date_row, (i + rsvp_col));
       var absolute_range = is_pastdate_cell.getA1Notation().replace(/([A-Z]*)([0-9]*)/, "$$$1$$$2");
 
       // Set the range for the rule_condition
       var range = {
         "sheetId": sheet_id,
-        "startRowIndex": rsvp_range.getRow() - 2,
-        "endRowIndex": rsvp_range.getLastRow(),
-        "startColumnIndex": i + rsvp_range.getColumn() - 1,
-        "endColumnIndex": i + rsvp_range.getColumn(),
+        "startRowIndex": rsvp_row - 2,
+        "endRowIndex": rsvp_lastrow,
+        "startColumnIndex": i + rsvp_col - 1,
+        "endColumnIndex": i + rsvp_col
       };
 
       // Condition rule for the formatting
@@ -215,7 +240,7 @@ function sheet (spreadsheet) {
       requests_list.push(req);
     }
 
-    return requests_list
+    return requests_list;
   }
 
   /**
@@ -230,22 +255,23 @@ function sheet (spreadsheet) {
   function getSquadConditionalFormatting () {
     var sheet_id = sh.getSheetId();
     var squad_range = ss.getRangeByName("squad") || ss.getRangeByName("_t_squad");
+    var squad_row = squad_range.getRow();
+    var squad_col = squad_range.getColumn();
+    var squad_lastcol = squad_range.getLastColumn();
     var requests_list = [];
-
-    SpreadsheetApp.flush();
 
     // Add each rows' update request into an array for batch processing
     for (var i = 0; i < squad_range.getNumRows(); i++) {
-      var isblank_cell = sh.getRange((i + squad_range.getRow()), squad_range.getColumn());
+      var isblank_cell = sh.getRange((i + squad_row), squad_col);
       var absolute_range = isblank_cell.getA1Notation().replace(/([A-Z]*)([0-9]*)/, "$$$1$$$2");
 
       // Set the range for the rule_condition
       var range = {
         "sheetId": sheet_id,
-        "startRowIndex": i + (squad_range.getRow() - 1),
-        "endRowIndex": i + squad_range.getRow(),
+        "startRowIndex": i + (squad_row - 1),
+        "endRowIndex": i + squad_row,
         "startColumnIndex": 0,
-        "endColumnIndex": squad_range.getLastColumn()
+        "endColumnIndex": squad_lastcol
       };
 
       // Condition rule for the formatting
@@ -278,7 +304,7 @@ function sheet (spreadsheet) {
       requests_list.push(req);
     }
 
-    return requests_list
+    return requests_list;
   }
 
   /**

@@ -40,6 +40,6 @@ function team (spreadsheet) {
    */
   return {
     get name() { return teamname_range.getValue() },
-    set name(val) { name = val; teamname_range.setValue(val) }
+    set name(val) { name = val; teamname_range.setValue(val); SpreadsheetApp.flush() }
   }
 }

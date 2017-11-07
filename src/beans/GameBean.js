@@ -84,8 +84,12 @@ function game (spreadsheet) {
                                                 column.length);
       rsvp_range.setBackground("#FFFFFF");
       hl_range.setBackground("#FFFDDD");
-    } 
+    }
     catch (e) { rsvp_range.setBackground("#FFFFFF") }
+    finally {
+      // Apply pending Spreadsheet changes
+      SpreadsheetApp.flush();
+    }
   }
   
   /**

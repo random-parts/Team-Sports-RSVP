@@ -63,7 +63,12 @@ function squad (spreadsheet) {
    * @return {String[]}
    */
   function getReturningRows () {
-    return ss.getRangeByName("nextSeasonRows").getValues().join().split(",");
+    var rr = ss.getRangeByName("nextSeasonRows").getValues().join().split(",");
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+
+    return rr;
   }
 
 
@@ -75,7 +80,12 @@ function squad (spreadsheet) {
    * @return {String[]}
    */
   function paidRows () {
-    return ss.getRangeByName("paidRangeRows").getValues().join().split(",");
+    var pr =  ss.getRangeByName("paidRangeRows").getValues().join().split(",");
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+
+    return pr;
   }
 
   /**

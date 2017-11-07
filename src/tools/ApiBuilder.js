@@ -100,7 +100,10 @@ function apiBuilder (ss, id) {
     var r = this.data_range || this.value_range.range || ss.getDataRange().getA1Notation();
     
     var response = Sheets.Spreadsheets.Values.update(_valueRange(this.value_range), ss_id, r, _updOptions(this.update.options))
-    
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+
     return response;
   }
   

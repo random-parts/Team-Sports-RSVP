@@ -99,7 +99,11 @@ function schedule (spreadsheet) {
    * @return {Array} Game DateTime values
    */
   function getCompositeDateValues () {
-    var dates = ss.getRangeByName("dateColumns").getValues(); 
+    var dates = ss.getRangeByName("dateColumns").getValues();
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+
     return dates[0].filter(String);
   }
   

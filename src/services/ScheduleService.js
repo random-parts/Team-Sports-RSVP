@@ -133,6 +133,9 @@ function scheduleService () {
   /*  END UPDATE SCHEDULE LOOP - finish running updateSchedule 
   *******************************************************************************/
 
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
+
     // Reset the rsvp columns to adjust for changes/additions to the schedule if needed.
     // Only runs if there is an addition to to the displayed schedule.
     // May cause rsvp column position problems if games are set and then after some time 
@@ -315,6 +318,8 @@ function scheduleService () {
   function _resetRSVPColumns (game_rsvps) {
     var current_sheet = ss.getSheets()[0];
     var rsvp_range = ss.getRangeByName("rsvpRange");
+    var rsvp_row = rsvp_range.getRow();
+    var rsvp_numrows = rsvp_range.getNumRows();
     var today = new Date();
     var isClear = false;
     var next_gameday_col = getNextGameDayCols()[0][0][0];
@@ -328,17 +333,17 @@ function scheduleService () {
         var current_column = schedule().gameColumn(e[0]);
         
         if (isClear == false) {
-          var clearRange = current_sheet.getRange(rsvp_range.getRow(), 
-                                                  next_gameday_col, 
-                                                  rsvp_range.getNumRows(), 
+          var clearRange = current_sheet.getRange(rsvp_row,
+                                                  next_gameday_col,
+                                                  rsvp_numrows,
                                                   (game_rsvps.length - i));
           clearRange.clear({contentsOnly: true});
           isClear = true;
         }
         // Skip if rsvp replies are empty
         if (e[1].length != 0) {
-          var game_rsvp_range = current_sheet.getRange(rsvp_range.getRow(), current_column, e[1].length);
-          
+          var game_rsvp_range = current_sheet.getRange(rsvp_row, current_column, e[1].length);
+
           // Build the update object
           var request = {
             "range": game_rsvp_range.getA1Notation(),
@@ -362,6 +367,9 @@ function scheduleService () {
     utils(ss).script.retry(function() {
       var response = Sheets.Spreadsheets.Values.batchUpdate(batch_request, ss_id);
     });
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
   /**

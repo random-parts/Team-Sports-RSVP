@@ -99,6 +99,9 @@ function teamService () {
     this.sheet_name = sheet[0].getName();
 
     this.setReturningSquad();
+
+    // Apply pending Spreadsheet changes
+    SpreadsheetApp.flush();
   }
   
   /**

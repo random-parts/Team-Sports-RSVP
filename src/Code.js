@@ -92,7 +92,6 @@ function onOpen (e) {
 
   // Build the Add-On Menu
   ui().menu(e);
-  SpreadsheetApp.flush();
 
   ss.setActiveSheet(ss.getSheets()[0]);
 }
@@ -119,8 +118,6 @@ function onDailyTrigger () {
 
   // Run email task
   emailService().sendMail("today");
-
-  SpreadsheetApp.flush();
 
   // Send daily email log
   emailService().sendMail("log");
@@ -196,8 +193,7 @@ function onNewSeason () {
   
   // Copy the returning squad mates to the new season sheet
   teamService().squad.setReturning();
-  
-  SpreadsheetApp.flush(); 
+
   Utilities.sleep(250);
   
   // Set the new web/online schedule link & team name
