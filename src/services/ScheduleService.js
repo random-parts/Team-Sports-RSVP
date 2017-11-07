@@ -46,10 +46,11 @@ function scheduleService () {
   function updateSchedule () {
     var s = schedule().raw() || "";
       if (!s.length) { return } // Exit on empty web schedule
-    
+
     var c = schedule(ss).composite() || "";
     var count = Math.max(s.length, c.length);
     var composite_dates = schedule(ss).compositeDates();
+    var c_shortformat = utils(ss,tz).date.format("short", composite_dates);
     var rsvp_values = schedule(ss).rsvp();
     var my_team = team().name;
     var column_offset = 0;
@@ -90,7 +91,7 @@ function scheduleService () {
       
       // Check if the cancelled game is the same game being rescheduled or a different game
       while (isCancelled(this.column) == true && isBeingRescheduled == true) {
-        var a = Utilities.formatDate(new Date(composite_dates[this.column]), tz, "EEE MMM d");
+        var a = c_shortformat[this.column];
         var b = s[i][0].replace(/-/, " ");
         if (a != b) {
            column_offset += 1;

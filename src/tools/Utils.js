@@ -97,6 +97,7 @@ function utils (spreadsheet, tz) {
       : [new Date()];
     var df = {
       logs: "dd-MMM-yy 'at' h:mm:s a",
+      short: "EEE MMM d",
       split: ["EEEE, MMMM dd","h:mm a"],
       yearday: "D"
     };
@@ -108,7 +109,12 @@ function utils (spreadsheet, tz) {
           return Utilities.formatDate(new Date(e), tz, df.logs);
           break;
 
-        // Format and splits into [date, time]
+        // Format into short display [Dayname shortMonth daynum]
+        case this == "short":
+          return Utilities.formatDate(new Date(e), tz, df.short);
+          break;
+
+         // Format and splits into [date, time]
         case this == "split":
           return [Utilities.formatDate(new Date(e), tz, df.split[0]),
                   Utilities.formatDate(new Date(e), tz, df.split[1])];
