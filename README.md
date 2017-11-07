@@ -36,6 +36,13 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
+v 1.3.18
+
+Fixes
+
+- Added `SpreadsheetApp.flush()` to to force the spreadsheet event queue to process before moving on. Should correct random errors from long processes (onDailyTrigger()) from trampling ahead of the spreadsheet events.
+
+
 v 1.3.17
 
 - Overhaul of Email Service task:
