@@ -27,7 +27,8 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 **Manual task running (Advanced Options):**
 
 - The sheet schedule should auto-update as the website updates. However, it may not if a copy of the spreadsheet is [open in restricted views][1]. It is possible to run updates using the `Advanced Options>Run schedule update` option.
-- 3 days and 1 day before the next gameday, the email task will process who has not yet rsvp'd to the game and will send an automated email reminder with the option to set their intention from within that email. If you feel a need to send the emails more often, the `Advanced Options>Run Send Email Task` is available to run the process immediately.
+- 3 days and 1 day before the next gameday, the email task will process who has not yet rsvp'd to the game and will send an automated email reminder with the option to set their intention from within that email. If you feel a need to send the emails more often, the `Advanced Options>Send Next Gameday Emails` is available to run the process immediately.
+- Send email reminders to pay player fees and to ask if current team members will be returning next season by running: `Advanced Options>Send Payment Due Emails` & `Advanced Options>Send Returning? Emails`
 
 **Google Sheets share permissions**
 
@@ -40,7 +41,7 @@ v 1.3.18
 
 Fixes
 
-- Added `SpreadsheetApp.flush()` to to force the spreadsheet event queue to process before moving on. Should correct random errors from long processes (onDailyTrigger()) from trampling ahead of the spreadsheet events.
+- Added `SpreadsheetApp.flush()` to force the spreadsheet event queue to process before moving on. Should correct random errors during long processes (onDailyTrigger()) from trampling ahead of the spreadsheet events.
 
 
 v 1.3.17
