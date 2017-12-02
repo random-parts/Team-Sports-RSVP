@@ -216,7 +216,7 @@ function emailService () {
       if (!squad_emails[1].length) { return }
     var n_gameday = scheduleService().nextGameDay();
       if (typeof n_gameday[0] == "undefined") { return }
-    var byeweeks = scheduleService().getByeWeeks(null, true);
+    var byeweeks = scheduleService().getByeWeeks(null, true) || [];
     var next_cols = n_gameday.reduce(function (r, e) { return r.concat(e[0]) }, []);
     var game_info = schedule(ss).composite.apply(null, next_cols);
     var bye_week = [], cancelled = [], rsvp = [];
@@ -293,6 +293,14 @@ function emailService () {
    *     email:Array.<{length}>,
    *     next_game: Array[]
    *   },
+   *   Debt: {
+   *     email:Array.<{length}>,
+   *     next_game: Array[]
+   *     },
+   *   Returning: {
+   *     email: Array.<{length}>,
+   *     next_game: Array[]
+   *   },
    *   Rsvp: {
    *     email: Array.<{length}>
    *   }
@@ -304,11 +312,14 @@ function emailService () {
     var game_info = schedule(ss).composite();
     var c_dates = schedule(ss).compositeDates();
     var today = utils(ss,tz).date.format("yearday")[0];
-    var byeweeks = scheduleService().getByeWeeks(c_dates, true);
+    var byeweeks = scheduleService().getByeWeeks(c_dates, true) || [];
     var current_games = utils(ss,tz).date.format("yearday", c_dates);
-    var bye_week = [], cancelled = [], rsvp = [];
+    var total_games = c_dates.length;
+    var skip_debt = false, skip_returning = false;
+    var bye_week = [], cancelled = [], debt = [],
+        returning = [], rsvp = [];
 
-    for (var i = 0; i < c_dates.length; i++) {
+    for (var i = 0; i < total_games; i++) {
       // Only process games in the future
       if (current_games[i] < today) { continue }
       // Set common values for byeweek and current game
@@ -325,6 +336,7 @@ function emailService () {
             // Set values for byeweek game only
             var g_date = utils(ss,tz).date.format("split",
                                                   new Date(byeweeks[0][1].toDateString()));
+            this.email = squad_emails[1];
             this.game_date = g_date[0][0];
             // Add the byeweek game set
             bye_week.push(this.byeweekEmail());
@@ -333,22 +345,48 @@ function emailService () {
           }
         }
       }
-      //** Check if Current game should have an email sent today **//
+
+      //** Check if other emails should be sent today **//
       if (_isEmailDay(current_games[i], today)) {
+
+        //** Check for Returning Emails **//
+        if (!skip_returning && (total_games - 3) > 0 && (total_games - i) <= 3) {
+          this.email = _getReturningInfo(squad_emails);
+          // Add the returning squad email set
+          returning.push(this.returningEmail());
+          // Get the next active game
+          var next_game = next_game || scheduleService().nextActiveGame(c_dates[i]);
+          // Skip after first run
+          skip_returning = true;
+        }
+
+        //** Check for Debt/Payment Emails **//
+        if (!skip_debt && i <= 3) {
+          this.email = _getDebtInfo(squad_emails);
+          // Add the payment email set
+          debt.push(this.debtEmail());
+          // Get the next active game
+          var next_game = next_game || scheduleService().nextActiveGame(c_dates[i]);
+          // Skip after first run
+          skip_debt = true;
+        }
+
         // Set values for current game only (rsvp or cancelled)
         var game_date = utils(ss,tz).date.format("split", c_dates[i])[0];
         this.game_date = game_date[0];
         this.game_time = game_date[1];
 
-        // Get the Cancelled Email Info/Set
+        //** Check for Cancelled Emails **//
         if (game_info[i][0] == "Cancelled") {
+          this.email = squad_emails[1];
           // Add the cancelled game set
           cancelled.push(this.cancelledEmail());
           // Get the next active game
           var next_game = next_game || scheduleService().nextActiveGame(c_dates[i]);
           continue;
         }
-        //** Get the RSVP Email Info/Set **//
+
+        //** Check for RSVP Emails **//
         var game_col = schedule(ss).gameColumn(c_dates[i]);
         // Get the rsvp email set with prefilled links
         this.email = _getRSVPInfo(c_dates[i], game_col, squad_emails);
@@ -364,6 +402,14 @@ function emailService () {
       },
       Cancelled: {
         email: cancelled,
+        next_game: next_game
+      },
+      Debt: {
+        email: debt,
+        next_game: next_game
+      },
+      Returning: {
+        email: returning,
         next_game: next_game
       },
       Rsvp: {
