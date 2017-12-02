@@ -253,7 +253,7 @@ function scheduleService () {
     var game_columns = [], game_dates = [], game_day = [];
 
     // Compares current column with next column for multiple games in one day
-    for (var i = 0; i < yearday.length; i++) {
+    for (var i = 0; i < c_dates.length; i++) {
       var current_date = yearday[i];
       var n_date = (typeof yearday[i + 1] != "undefined")
                      ? yearday[i + 1] : false;
