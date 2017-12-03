@@ -37,6 +37,16 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
+v 1.3.19
+
+- Auto sends `Payment` due emails to team members that are not marked as paid. They are only sent for the first 3 games to avoid extraneous emails in the cases where fees are paid but the status not updated.
+- Auto sends the team `Returning` emails. The must be more than 3 games on the schedule and 3 games or fewer left in the season.
+
+Fixes
+
+- Corrects an error when trying to send manual emails on a sheet without a schedule
+
+
 v 1.3.18
 
 Fixes
