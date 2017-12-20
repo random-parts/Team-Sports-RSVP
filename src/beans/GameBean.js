@@ -79,9 +79,9 @@ function game (spreadsheet) {
   function highlightGameColumn () {
     try {
       var hl_range = ss.getSheets()[0].getRange(rsvp_range.getRow(),
-                                                column[0],
+                                                column[0][0],
                                                 rsvp_range.getNumRows(),
-                                                column.length);
+                                                column[0].length);
       rsvp_range.setBackground("#FFFFFF");
       hl_range.setBackground("#FFFDDD");
     }

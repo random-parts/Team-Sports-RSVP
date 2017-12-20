@@ -146,7 +146,7 @@ function scheduleService () {
     }
     
     // Set the column highlight on the next gameday game columns
-    this.column = getNextGameDayCols()[0][0];
+    this.column = getNextGameDayCols()[0];
     this.highlightGame();
   }
 
