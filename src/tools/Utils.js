@@ -146,13 +146,40 @@ function utils (spreadsheet, tz) {
    * @memberof! utils#
    * @param {String} date - string month and day
    * @param {String} time - string time
-   * @return {String} _"MMM dd h:mm a"_
+   * @param {Date} today - todays date
+   * @return {String} _"MMM dd h:mm a"_ || "M/d/y h:mm a"
    */
-  function rawDateTime (date, time) {
-    if (typeof date != "undefined") {
+  function rawDateTime (date, time, today) {
+    const months = ["jan", "feb", "mar", "apr", "may", "jun",
+                    "jul","aug", "sep", "oct", "nov", "dec"];
+    try {
+      if (typeof date != "undefined") {
+        var today_month = today.getMonth();
+        var today_year = today.getFullYear();
+        var gamedate = date + " " + time;
+        // Split the date into its parts
+        var gd_parts = gamedate.slice(4).split(" ");
+        var game_month = months.indexOf(gd_parts[0].toLowerCase());
+
+        // If today is Oct-Dec - set new year for games scheduled Jan-Mar
+        if (today_month >= 9 && game_month <= 3) {
+          var game_year = today_year + 1;
+        } else {
+          throw {message: "utils().rawDateTime(): Dates not within range"}
+        }
+
+        var full_gamedate = (game_month +1 ) + "/" + gd_parts[1] + "/" + game_year
+                                           + " " + gd_parts[2] + " " + gd_parts[3];
+      }
+    }
+    catch (e) {
+      // Run the old dateTime if the aboved erred
       var clean_date = date.replace(/-/, " ");
-      
-      return clean_date + " " + time;
+      var full_gamedate = clean_date + " " + time;
+    }
+
+    finally {
+      return full_gamedate;
     }
   }
 

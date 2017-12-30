@@ -46,7 +46,7 @@ function scheduleService () {
   function updateSchedule () {
     var s = schedule().raw() || "";
       if (!s.length) { return } // Exit on empty web schedule
-
+    var today = new Date();
     var c = schedule(ss).composite() || "";
     var count = Math.max(s.length, c.length);
     var composite_dates = schedule(ss).compositeDates();
@@ -123,7 +123,7 @@ function scheduleService () {
 
       // Only set the date when status is a time or the date cell is empty
       if (RegExp(/^[0-9]+/).test(s[i][4]) == true) {
-        this.date = utils(ss,tz).date.makeDateTime(s[i][0], s[i][4]);
+        this.date = utils(ss,tz).date.makeDateTime(s[i][0], s[i][4], today);
       } else if (!this.date) {
         try { this.date = s[i][0].replace(/-/, " ") } 
          catch (e) {}
@@ -258,7 +258,7 @@ function scheduleService () {
       var n_date = (typeof yearday[i + 1] != "undefined")
                      ? yearday[i + 1] : false;
 
-      if (current_date >= today && c_dates[i] != "") {
+      if (c_dates[i] != "" && current_date >= today || (today >= 330 && current_date <= 60)) {
         game_dates.push(c_dates[i]);
         game_columns.push(schedule(ss).gameColumn(c_dates[i]));
         // Exit if the next day was found and there are no more days needed
