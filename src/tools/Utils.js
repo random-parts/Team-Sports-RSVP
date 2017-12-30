@@ -152,6 +152,8 @@ function utils (spreadsheet, tz) {
   function rawDateTime (date, time, today) {
     const months = ["jan", "feb", "mar", "apr", "may", "jun",
                     "jul","aug", "sep", "oct", "nov", "dec"];
+    var full_gamedate;
+
     try {
       if (typeof date != "undefined") {
         var today_month = today.getMonth();
@@ -168,14 +170,14 @@ function utils (spreadsheet, tz) {
           throw {message: "utils().rawDateTime(): Dates not within range"}
         }
 
-        var full_gamedate = (game_month +1 ) + "/" + gd_parts[1] + "/" + game_year
+        full_gamedate = (game_month +1 ) + "/" + gd_parts[1] + "/" + game_year
                                            + " " + gd_parts[2] + " " + gd_parts[3];
       }
     }
     catch (e) {
       // Run the old dateTime if the aboved erred
       var clean_date = date.replace(/-/, " ");
-      var full_gamedate = clean_date + " " + time;
+      full_gamedate = clean_date + " " + time;
     }
 
     finally {
