@@ -37,6 +37,14 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
+v 1.3.20
+
+Fixes
+
+- The correct year will now be applied to games scheduled for the new year. [See the commit msg for details](https://github.com/random-parts/Team-Sports-RSVP/commit/3abfa2c1eadaaeb5ce03d500cc67865a91b9ef0c) 
+- Corrects an error with GameDay column highlighting causing errors
+
+
 v 1.3.19
 
 - Auto sends `Payment` due emails to team members that are not marked as paid. They are only sent for the first 3 games to avoid extraneous emails in the cases where fees are paid but the status not updated.
