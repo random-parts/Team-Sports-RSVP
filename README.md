@@ -37,11 +37,18 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
+v 1.3.21
+
+Fixes
+
+- Next GameDay column highlight will now factor in the year of the games scheduled. Based on schedules that are 120 days in length or less.
+
+
 v 1.3.20
 
 Fixes
 
-- The correct year will now be applied to games scheduled for the new year. [See the commit msg for details](https://github.com/random-parts/Team-Sports-RSVP/commit/3abfa2c1eadaaeb5ce03d500cc67865a91b9ef0c) 
+- The correct year will now be applied to games scheduled for the new year. [See the commit msg for details](https://github.com/random-parts/Team-Sports-RSVP/commit/192ced83e0fc95a343e0cf3b44dfd88e171e54d1) 
 - Corrects an error with GameDay column highlighting causing errors
 
 
