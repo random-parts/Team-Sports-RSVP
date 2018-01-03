@@ -258,7 +258,8 @@ function scheduleService () {
       var n_date = (typeof yearday[i + 1] != "undefined")
                      ? yearday[i + 1] : false;
 
-      if (c_dates[i] != "" && current_date >= today || (today >= 330 && current_date <= 60)) {
+      if (c_dates[i] != "" && ((today >= 275 && current_date <= 120)
+          || (c_dates[i].getFullYear() >= date.getFullYear() && current_date >= today))) {
         game_dates.push(c_dates[i]);
         game_columns.push(schedule(ss).gameColumn(c_dates[i]));
         // Exit if the next day was found and there are no more days needed
