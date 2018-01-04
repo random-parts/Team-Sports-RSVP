@@ -31,7 +31,8 @@ function ui () {
   var ui = SpreadsheetApp.getUi();
   const alert_msg = { 
     clearall: "This Action will clear ALL values from the Displayed Schedule "
-            + "and ALL RSVP's.\n\nDo you still want to continue?", 
+            + "and ALL RSVP's.\n\nDo you still want to continue?",
+    cleardefault: "This is a default message, you probably should not be seeing it.\n\nWas this action intended?",
     sendmail: "This Action will immediately send all emails required for the "
             + "next gameday,\nregardless of the current on-days-to-send email "
             + "setting.\n\nDo you still want to continue?",
@@ -61,19 +62,20 @@ function ui () {
   
   /**
    * ---
-   * Alert the user to confirm the desired action of clearing all 
-   * displayed schedules and rsvp values.
-   * 
-   * @memberof! ui# 
+   * Confirm clear values prompt/alert. Uses the alert_msg object for messages.
+   *
+   * @memberof! ui#
+   * @param {String} msg - the alert_msg[] to display
    * @return {Boolean|Null}
    */
-  function isOkToClearValues () {
-    var alert = ui.alert(alert_msg.clearall, ui.ButtonSet.YES_NO);
-    
+  function isOkToClearValues (msg) {
+    var msg = msg || "cleardefault";
+    var alert = ui.alert(alert_msg[msg], ui.ButtonSet.YES_NO);
+
     if (alert == ui.Button.YES) { return true }
      else if (alert == ui.Button.NO) { return false }
      else if (alert == ui.Button.CLOSE) { ui.alert("Action was cancelled") }
-    
+
     return null;
   }
 
@@ -237,7 +239,7 @@ function ui () {
   /**
    * @typedef {ui} ui.PublicInterface
    * @property {Function} informSetupComplete - [ui().alert.done()]{@link ui#informSetupComplete}
-   * @property {Function} isOkToClearValues - [ui().confirm.clearall()]{@link ui#isOkToClearValues}
+   * @property {Function} isOkToClearValues - [ui().confirm.clear()]{@link ui#isOkToClearValues}
    * @property {Function} sendEmail - [ui().confirm.sendmail()]{@link ui#sendEmail}
    * @property {Function} isTeamName - [ui().confirm.teamname()]{@link ui#isTeamName}
    * @property {Function} addonMenu - [ui().menu()]{@link ui#addonMenu}
@@ -250,7 +252,7 @@ function ui () {
       done: informSetupComplete
     },
     confirm: {
-      clearall: isOkToClearValues,
+      clear: isOkToClearValues,
       sendemail: sendEmail,
       teamname: isTeamName
     },
