@@ -33,6 +33,7 @@ function ui () {
     clearall: "This Action will clear ALL values from the Displayed Schedule "
             + "and ALL RSVP's.\n\nDo you still want to continue?",
     cleardefault: "This is a default message, you probably should not be seeing it.\n\nWas this action intended?",
+    clearteam: "You are about to change the Team Name.\nChanging the Team Name may cause funny things to occur that may not be desirable.\n\nDo you want to continue?",
     sendmail: "This Action will immediately send all emails required for the "
             + "next gameday,\nregardless of the current on-days-to-send email "
             + "setting.\n\nDo you still want to continue?",

@@ -151,6 +151,14 @@ function onSheetEdit (e) {
   var change_cell_col = e.range.columnStart;
   var data_range = ss.getRangeByName("webSchedule");
 
+  // UI Prompt confirm manual teamname change
+  if (range.getA1Notation() == "A1") {
+    if (!ui().confirm.clear("clearteam")) {
+      // Set cell back to old value if the change was not wanted
+      range.setValue(e.oldValue);
+    }
+  }
+
   // Check if the edits are with the web data/schedule values
   if ((data_range.getRow() <= change_cell_row == change_cell_row <= data_range.getLastRow()) &&
       (data_range.getColumn() <= change_cell_col == change_cell_col <= data_range.getLastColumn())) {
