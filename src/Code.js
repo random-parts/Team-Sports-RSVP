@@ -319,12 +319,13 @@ function onRunReturningEmail () {
  */
 function onWeblinkUpdate () {
   var name_prompt = ui().confirm.teamname;
-  var isConfirmed = ui().confirm.clear("clearall");
 
   // Prompt to clear schedule range if it is not blank
   if (!scheduleService().isScheduleBlank()) {
+    var isConfirmed = ui().confirm.clear("clearall");
+
     if (!isConfirmed()) { return }
-    
+
     sheetService().clear.scheduleRanges();
     // Reset data validation and protections
     sheetService().update.protection();
