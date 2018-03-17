@@ -37,6 +37,14 @@ https://chrome.google.com/webstore/detail/team-sports-rsvp/ijpfbndfefefamogmomfg
 ---
 ### Change Log
 
+v 1.3.22
+
+Fixes
+
+- A confirmation prompt will now appear when the Team Name cell is being edited
+- Will now only send the sent-email-log on days that it has sent emails to report - i.e., no more empty email logs.
+
+
 v 1.3.21
 
 Fixes
