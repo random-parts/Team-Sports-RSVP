@@ -121,7 +121,7 @@ function emailService () {
     var email_logs = storage().log.get("email");
     var e_log = [];
 
-    if (email_logs) {
+    if (email_logs && email_logs.length) {
       this.email = [["Email-Log Task", ss.getOwner().getEmail()]];
       this.team_name = team_name;
       this.log = email_logs;
